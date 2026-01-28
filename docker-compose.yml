@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tecc_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-tecc_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-tecc_password}
+      POSTGRES_DB: ${DB_NAME:-tecc_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tecc_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tecc_backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-tecc_user}:${DB_PASSWORD:-tecc_password}@db:5432/${DB_NAME:-tecc_db}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: tecc_frontend
+    environment:
+      VITE_API_URL: http://backend:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+    depends_on:
+      - backend
+    command: npm run dev
+
+volumes:
+  postgres_data:
