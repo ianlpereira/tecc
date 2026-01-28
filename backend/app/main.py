@@ -6,7 +6,7 @@ Sistema Financeiro Centralizado de Contas a Pagar
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routers import health
+from app.routers import health, branches, vendors, categories, bills
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -28,6 +28,10 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health.router, tags=["Health"])
+app.include_router(branches.router)
+app.include_router(vendors.router)
+app.include_router(categories.router)
+app.include_router(bills.router)
 
 # Root endpoint
 @app.get("/")
@@ -42,3 +46,4 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=settings.DEBUG)
+

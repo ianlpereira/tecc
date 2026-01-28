@@ -1,6 +1,6 @@
-# 📊 Status de Setup - Épico 1 (Foundation)
+# 📊 Status Projeto - Épicos 1, 2 e 3
 
-## ✅ Completado com Sucesso
+## ✅ ÉPICO 1 - Completado com Sucesso (Foundation)
 
 ### Estrutura de Pastas
 - [x] Monorepo `/backend` e `/frontend` criado
@@ -97,6 +97,145 @@ docker-compose up -d --build
    - Frontend: http://localhost:5173
    - Backend: http://localhost:8000
    - API Docs: http://localhost:8000/api/docs
+
+---
+
+## ✅ ÉPICO 2 - Completado com Sucesso (Backend Models & Endpoints)
+
+### Fase 2.1: Migrations & Models ✅
+- [x] Alembic inicializado
+- [x] alembic/env.py configurado com DATABASE_URL
+- [x] Modelos criados:
+  - [x] `app/models/branch.py` - Filiais
+  - [x] `app/models/vendor.py` - Fornecedores
+  - [x] `app/models/category.py` - Categorias
+  - [x] `app/models/bill.py` - Contas a Pagar (com enum BillStatus)
+- [x] Migration automática criada
+- [x] Migration aplicada ao banco de dados
+
+### Fase 2.2: Repositories & Services ✅
+- [x] Base repository genérico criado (`app/repositories/base.py`)
+- [x] Repositories CRUD:
+  - [x] `app/repositories/branch_repository.py`
+  - [x] `app/repositories/vendor_repository.py`
+  - [x] `app/repositories/category_repository.py`
+  - [x] `app/repositories/bill_repository.py`
+- [x] Services com lógica de negócio:
+  - [x] `app/services/branch_service.py`
+  - [x] `app/services/vendor_service.py`
+  - [x] `app/services/category_service.py`
+  - [x] `app/services/bill_service.py`
+
+### Fase 2.3: Schemas Pydantic ✅
+- [x] Schemas Create/Update/Response:
+  - [x] `app/schemas/branch.py` - BranchCreate, BranchUpdate, BranchResponse
+  - [x] `app/schemas/vendor.py` - VendorCreate, VendorUpdate, VendorResponse
+  - [x] `app/schemas/category.py` - CategoryCreate, CategoryUpdate, CategoryResponse
+  - [x] `app/schemas/bill.py` - BillCreate, BillUpdate, BillResponse
+
+### Fase 2.4: Routers & Endpoints ✅
+- [x] Routers REST com GET, POST, PUT, DELETE:
+  - [x] `app/routers/branches.py`
+  - [x] `app/routers/vendors.py`
+  - [x] `app/routers/categories.py`
+  - [x] `app/routers/bills.py`
+- [x] Error handling com HTTPException
+- [x] Todos os routers integrados em `app/main.py`
+
+### Endpoints Funcionais ✅
+- ✅ `GET /api/v1/branches` - Listar filiais
+- ✅ `POST /api/v1/branches` - Criar filial
+- ✅ `GET /api/v1/branches/{id}` - Obter filial
+- ✅ `PUT /api/v1/branches/{id}` - Atualizar filial
+- ✅ `DELETE /api/v1/branches/{id}` - Deletar filial
+- ✅ (Idem para vendors, categories, bills)
+
+**Status:** ✅ **PRONTO PARA USO**
+
+---
+
+## 📋 ÉPICO 3 - Planejamento Detalhado (Frontend)
+
+**Arquivo:** `EPIC-3-PLANNING.md` (criado)
+
+### Fase 3.1: Setup de Hooks & Services (P0 - CRÍTICO)
+- [ ] React Query setup e instância
+- [ ] Custom hooks:
+  - [ ] useBranches()
+  - [ ] useVendors()
+  - [ ] useCategories()
+  - [ ] useBills()
+- [ ] API Client utilities melhorados
+
+### Fase 3.2: Componentes UI (P1 - MVP)
+- [ ] BranchSelector - Dropdown de filiais
+- [ ] BranchForm - Formulário CRUD
+- [ ] VendorSelector - Dropdown de fornecedores
+- [ ] BillForm - Formulário de contas
+- [ ] BillTable - Tabela paginada
+
+### Fase 3.3: Pages (P0 - CRÍTICO)
+- [ ] Dashboard - Home com estatísticas
+- [ ] Branches - Gestão de filiais
+- [ ] Vendors - Gestão de fornecedores
+- [ ] Categories - Gestão de categorias
+- [ ] Bills - Gestão de contas (PRINCIPAL)
+- [ ] NotFound - Página 404
+
+### Fase 3.4: Styling & Layout (P1 - MVP)
+- [ ] Theme refinamento
+- [ ] Componentes styled (Layout, Card, Button, Input, Modal)
+- [ ] Responsive design
+
+### Fase 3.5: Routing & Navigation (P0 - CRÍTICO)
+- [ ] React Router setup
+- [ ] Rotas principais
+- [ ] Sidebar com navegação
+- [ ] Active route highlighting
+
+### Fase 3.6: Testes & QA (P2 - POLISH)
+- [ ] Vitest + React Testing Library setup
+- [ ] Testes para hooks
+- [ ] Testes para componentes
+- [ ] Coverage 70%+
+
+**Estimativa:** 26-34 horas de trabalho  
+**Status:** 📋 Pronto para iniciar  
+**Prioridade:** ALTA
+
+---
+
+## 📊 Resumo Geral
+
+| Épico | Status | Fases | Estimativa |
+| ----- | ------ | ----- | ---------- |
+| 1 - Foundation | ✅ **CONCLUÍDO** | 1/1 | ~8h |
+| 2 - Backend | ✅ **CONCLUÍDO** | 4/4 | ~15h |
+| 3 - Frontend | 📋 **PLANEJADO** | 6 fases | ~26-34h |
+
+**Total Projeto:** ~49-57 horas  
+**Próximo Passo:** Iniciar Épico 3, Fase 3.1 (Hooks & Services)
+
+---
+
+## 🎯 Arquitetura Completa
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Frontend (React)                     │
+│  Pages → Components → Hooks → Services → API Client    │
+├─────────────────────────────────────────────────────────┤
+│                 Backend (FastAPI)                       │
+│  Routers → Services → Repositories → Models            │
+├─────────────────────────────────────────────────────────┤
+│              Database (PostgreSQL)                      │
+│  Branches | Vendors | Categories | Bills               │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+**Última Atualização:** 27 Jan 2026 - Épico 2 Completo ✅
 
 4. Comece Épico 2 (Modelos & Endpoints)
 
