@@ -1,5 +1,7 @@
 # 📊 Status Projeto - Épicos 1, 2 e 3
 
+> **Última Atualização:** 30 de Janeiro de 2026
+
 ## ✅ ÉPICO 1 - Completado com Sucesso (Foundation)
 
 ### Estrutura de Pastas
@@ -51,52 +53,94 @@
 
 ---
 
-## ⚠️ Erro Atual: Docker Desktop I/O
+## ✅ ÉPICO 2 - Completado com Sucesso (Backend)
 
-**Tipo:** `input/output error` no buildkit
-**Causa:** Sistema de arquivos ou HD com problemas de I/O
-**Gravidade:** Infraestrutura local, não código
+### Models & Repositories
+- [x] `models/branch.py` - Modelo de Filiais
+- [x] `models/vendor.py` - Modelo de Fornecedores
+- [x] `models/category.py` - Modelo de Categorias
+- [x] `models/bill.py` - Modelo de Contas a Pagar (com BillStatus enum)
+- [x] `repositories/base.py` - Repository base genérico
+- [x] `repositories/branch_repository.py`
+- [x] `repositories/vendor_repository.py`
+- [x] `repositories/category_repository.py`
+- [x] `repositories/bill_repository.py`
 
-### Solução Recomendada
+### Services & Schemas
+- [x] `services/branch_service.py`
+- [x] `services/vendor_service.py`
+- [x] `services/category_service.py`
+- [x] `services/bill_service.py`
+- [x] `schemas/branch.py`
+- [x] `schemas/vendor.py`
+- [x] `schemas/category.py`
+- [x] `schemas/bill.py`
 
-Siga `DOCKER-FIX.md`:
+### Routers (16 endpoints)
+- [x] `routers/branches.py` - 5 endpoints CRUD
+- [x] `routers/vendors.py` - 5 endpoints CRUD
+- [x] `routers/categories.py` - 5 endpoints CRUD
+- [x] `routers/bills.py` - 5 endpoints CRUD (com filtros)
 
-```powershell
-# 1. Feche Docker Desktop
-# 2. Limpe dados
-Remove-Item -Path "$env:APPDATA\Docker" -Recurse -Force -ErrorAction SilentlyContinue
+---
 
-# 3. Reinicie Docker Desktop
-# 4. Tente novamente
-cd c:\Users\ianlp\Documents\projs\tecc
+## ✅ ÉPICO 3 - Completado com Sucesso (Frontend)
+
+### Tipos & Serviços (Fase 3.1)
+- [x] `src/types/index.ts` - Interfaces TypeScript
+- [x] `src/services/api.ts` - Funções CRUD para API
+
+### Custom Hooks (Fase 3.1)
+- [x] `src/hooks/useBranches.ts` - React Query hook
+- [x] `src/hooks/useVendors.ts` - React Query hook
+- [x] `src/hooks/useCategories.ts` - React Query hook
+- [x] `src/hooks/useBills.ts` - React Query hook
+
+### Componentes UI (Fase 3.2 + 3.4)
+- [x] `src/components/Layout/` - Header, Sidebar, Layout
+- [x] `src/components/Card/` - Card wrapper
+- [x] `src/components/BranchSelector/` - Dropdown de filiais
+- [x] `src/components/BranchForm/` - Formulário com validação
+- [x] `src/components/VendorForm/` - Formulário com validação
+- [x] `src/components/CategoryForm/` - Formulário com validação
+- [x] `src/components/BillForm/` - Formulário completo com validação
+
+### Pages (Fase 3.3)
+- [x] `src/pages/Dashboard/` - Dashboard com estatísticas
+- [x] `src/pages/Branches/` - CRUD completo de Filiais
+- [x] `src/pages/Vendors/` - CRUD completo de Fornecedores
+- [x] `src/pages/Categories/` - CRUD completo de Categorias
+- [x] `src/pages/Bills/` - CRUD completo de Contas
+- [x] `src/pages/NotFound/` - Página 404
+
+### Routing (Fase 3.5)
+- [x] `src/App.tsx` - Rotas configuradas com React Router
+- [x] Navegação via Sidebar
+- [x] Rota principal redirects para Dashboard
+
+---
+
+## 🚀 Aplicação em Funcionamento
+
+### Acessos
+- **Frontend:** http://localhost:5173
+- **Backend:** http://localhost:8000
+- **API Docs:** http://localhost:8000/api/docs
+
+### Comandos Docker
+```bash
+# Iniciar containers
 docker-compose up -d --build
+
+# Ver logs
+docker-compose logs -f
+
+# Parar containers
+docker-compose down
+
+# Executar migrations (se necessário)
+docker exec tecc_backend alembic upgrade head
 ```
-
----
-
-## 📋 Arquivos Corrigidos
-
-1. `frontend/Dockerfile`
-   - ✅ Removido `npm install -g npm@latest` 
-   - ✅ Mudado para `npm install` (não ci)
-   - ✅ Mudado de Alpine para Slim
-
-2. `docker-compose.yml`
-   - ✅ Removido `version: '3.8'`
-
-3. Criados
-   - ✅ `DOCKER-FIX.md` - Guia de correção
-
----
-
-## 🚀 Próximos Passos (Quando Docker funcionar)
-
-1. Execute `docker-compose up -d --build`
-2. Aguarde ~2 minutos
-3. Acesse:
-   - Frontend: http://localhost:5173
-   - Backend: http://localhost:8000
-   - API Docs: http://localhost:8000/api/docs
 
 ---
 

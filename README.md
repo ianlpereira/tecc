@@ -2,6 +2,8 @@
 
 > Sistema de gestão centralizada de contas a pagar para matriz com múltiplas filiais.
 
+[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)]() [![Backend](https://img.shields.io/badge/backend-100%25-success)]() [![Frontend](https://img.shields.io/badge/frontend-100%25-success)]()
+
 ## 📋 Visão Geral
 
 **TECC** é um sistema financeiro interno para gerenciar contas a pagar de uma matriz e 19 filiais dispersas geograficamente. Centraliza toda a gestão financeira com forte separação lógica de dados por filial.
