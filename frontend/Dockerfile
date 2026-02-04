@@ -20,7 +20,10 @@ CMD ["npm", "run", "dev"]
 # Build stage
 FROM base AS builder
 
+ARG VITE_API_URL=http://localhost:8000
+
 ENV NODE_ENV=production
+ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
 
