@@ -20,9 +20,10 @@ class Settings(BaseSettings):
 
     # CORS
     CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",      # Local frontend dev
-        "http://localhost:3000",      # Local frontend prod
-        "http://frontend:5173",       # Docker compose frontend container
+        "http://localhost:5173",           # Local frontend dev
+        "http://localhost:3000",           # Local frontend prod
+        "http://frontend:5173",            # Docker compose frontend container
+        "https://tecc-3dyu.onrender.com/",  # Render frontend
     ]
 
     # API

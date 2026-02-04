@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: tecc-backend
+    runtime: docker
+    region: ohio
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql+asyncpg://tecc_user:tecc_password@db:5432/tecc_db
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    autoDeploy: true
+
+  - type: web
+    name: tecc-frontend
+    runtime: docker
+    region: ohio
+    plan: starter
+    envVars:
+      - key: VITE_API_URL
+        value: https://tecc-backend.onrender.com
+      - key: NODE_ENV
+        value: production
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    autoDeploy: true
+
+  - type: pserv
+    name: tecc-db
+    runtime: docker
+    region: ohio
+    plan: starter
+    dockerfilePath: ./Dockerfile.postgres
+    autoDeploy: false
