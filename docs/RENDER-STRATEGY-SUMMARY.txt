@@ -1,0 +1,62 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║                 RENDER STRATEGY - RESUMO EXECUTIVO               ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+🎯 OBJETIVO: Deploy GRÁTIS por 3 meses + testar com cliente
+
+�� ECONOMIA:
+   • Render:  $0 por 3 meses
+   • Railway: $66 por 3 meses
+   • ECONOMIA: $66! 💰
+
+⏱️ TIMELINE:
+   • Setup: ~30 minutos
+   • Deploy: Automático (git push)
+   • Cliente testa: IMEDIATAMENTE
+
+🚀 5 PASSOS:
+   1. Criar conta Render (5 min)
+   2. Backend (8 min)
+   3. PostgreSQL (automático)
+   4. Frontend (5 min)
+   5. Testar (5 min)
+
+🌐 URLS FINAIS:
+   Frontend: https://tecc-frontend-[ID].onrender.com
+   Backend:  https://tecc-backend-[ID].onrender.com
+   API Docs: https://tecc-backend-[ID].onrender.com/api/docs
+
+⚠️ SPIN-DOWN (30seg primeira vez):
+   → Documentar para cliente
+   → Usar UptimeRobot (FREE) para manter acordado
+   → Aceitar como limitação de teste grátis
+
+📈 DEPOIS (MÊS 4+):
+   • Opção A: Migrar para Railway (30 min)
+   • Opção B: Continuar Render ($29/mês)
+   • Opção C: Cancelar (sem prejuízo - $0 investido)
+
+✅ RECOMENDAÇÃO:
+   Use Render AGORA (economiza $66)
+   Migre para Railway depois (se gostar)
+
+🎬 COMECE:
+   1. https://render.com
+   2. Sign up com GitHub
+   3. Siga os 5 passos
+   4. Pronto em 30 minutos!
+
+📚 DOCUMENTOS CRIADOS:
+   • DEPLOY-RENDER-GRATIS.md    (Guia completo)
+   • RENDER-vs-RAILWAY.md        (Comparação)
+   • RENDER-COMECE-AGORA.md      (Quick start)
+
+💡 PRO TIP:
+   HOJE:  Render (GRÁTIS)
+   MÊS 4: Railway (MELHOR)
+
+═══════════════════════════════════════════════════════════════════
+
+PRÓXIMO PASSO: Abra https://render.com e comece! 🚀
+
+═══════════════════════════════════════════════════════════════════
