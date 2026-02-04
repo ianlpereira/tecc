@@ -1,6 +1,19 @@
 import axios, { AxiosInstance } from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Determine API URL at runtime:
+// 1. Try localhost:8000 (works when accessing from browser on host machine)
+// 2. Fall back to VITE_API_URL env var (for Docker/production)
+// 3. Final fallback to localhost:8000
+const getApiUrl = (): string => {
+  // If VITE_API_URL is explicitly set (e.g., in production), use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+  // Default to localhost for development (works from host browser)
+  return 'http://localhost:8000'
+}
+
+const API_URL = getApiUrl()
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_URL,

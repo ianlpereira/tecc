@@ -19,7 +19,11 @@ class Settings(BaseSettings):
     DB_ECHO: bool = False
 
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:5173",      # Local frontend dev
+        "http://localhost:3000",      # Local frontend prod
+        "http://frontend:5173",       # Docker compose frontend container
+    ]
 
     # API
     API_V1_STR: str = "/api/v1"
