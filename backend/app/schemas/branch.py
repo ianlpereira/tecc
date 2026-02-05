@@ -2,6 +2,7 @@
 Branch schemas for Pydantic validation.
 """
 
+from typing import Optional, List
 from app.schemas.base import BaseSchema, TimestampedSchema
 
 
@@ -10,6 +11,7 @@ class BranchBase(BaseSchema):
 
     name: str
     is_headquarters: bool = False
+    parent_branch_id: Optional[int] = None
 
 
 class BranchCreate(BranchBase):
@@ -23,6 +25,7 @@ class BranchUpdate(BaseSchema):
 
     name: str | None = None
     is_headquarters: bool | None = None
+    parent_branch_id: int | None = None
 
 
 class BranchResponse(TimestampedSchema):
@@ -31,3 +34,12 @@ class BranchResponse(TimestampedSchema):
     id: int
     name: str
     is_headquarters: bool
+    parent_branch_id: Optional[int] = None
+    parent_name: Optional[str] = None
+    children_count: int = 0
+
+
+class BranchWithChildren(BranchResponse):
+    """Schema for branch with children details."""
+
+    children: List["BranchResponse"] = []

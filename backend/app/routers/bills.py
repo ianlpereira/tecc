@@ -2,9 +2,9 @@
 Bill router with CRUD endpoints.
 """
 
-from typing import List
+from typing import List, Optional
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.schemas import BillCreate, BillUpdate, BillResponse
@@ -15,17 +15,29 @@ router = APIRouter(prefix="/api/v1/bills", tags=["bills"])
 
 
 @router.get("/", response_model=List[BillResponse])
-async def list_bills(db: AsyncSession = Depends(get_db)):
-    """Get all bills."""
+async def list_bills(
+    branch_id: Optional[int] = Query(None, description="Filter by branch ID"),
+    include_children: bool = Query(False, description="Include child branches when filtering by branch"),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all bills, optionally filtered by branch (with hierarchy support)."""
     service = BillService(db)
+    
+    if branch_id:
+        return await service.get_bills_by_branch(branch_id, include_children)
+    
     return await service.get_all_bills()
 
 
 @router.get("/branch/{branch_id}", response_model=List[BillResponse])
-async def get_bills_by_branch(branch_id: int, db: AsyncSession = Depends(get_db)):
-    """Get all bills for a branch."""
+async def get_bills_by_branch(
+    branch_id: int, 
+    include_children: bool = Query(False, description="Include child branches"),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all bills for a branch, optionally including child branches."""
     service = BillService(db)
-    return await service.get_bills_by_branch(branch_id)
+    return await service.get_bills_by_branch(branch_id, include_children)
 
 
 @router.get("/vendor/{vendor_id}", response_model=List[BillResponse])

@@ -7,18 +7,27 @@ export interface Branch {
   id: number;
   name: string;
   is_headquarters: boolean;
+  parent_branch_id?: number | null;
+  parent_name?: string | null;
+  children_count?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface BranchWithChildren extends Branch {
+  children: Branch[];
 }
 
 export interface BranchCreate {
   name: string;
   is_headquarters?: boolean;
+  parent_branch_id?: number | null;
 }
 
 export interface BranchUpdate {
   name?: string;
   is_headquarters?: boolean;
+  parent_branch_id?: number | null;
 }
 
 // Vendor types

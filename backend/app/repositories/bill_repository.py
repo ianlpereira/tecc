@@ -22,6 +22,13 @@ class BillRepository(BaseRepository[Bill]):
         )
         return result.scalars().all()
 
+    async def get_by_branches(self, branch_ids: List[int]) -> List[Bill]:
+        """Get all bills for multiple branches (for hierarchy filtering)."""
+        result = await self.db.execute(
+            select(Bill).where(Bill.branch_id.in_(branch_ids))
+        )
+        return result.scalars().all()
+
     async def get_by_vendor(self, vendor_id: int) -> List[Bill]:
         """Get all bills from a vendor."""
         result = await self.db.execute(

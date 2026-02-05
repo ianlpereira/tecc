@@ -1,0 +1,13 @@
+{
+  "name": "tecc",
+  "version": "1.0.0",
+  "description": "TECC - Full Stack Application",
+  "scripts": {
+    "migration:create": "cd backend && alembic revision --autogenerate -m",
+    "migration:run": "cd backend && alembic upgrade head",
+    "migration:rollback": "cd backend && alembic downgrade -1",
+    "migration:history": "cd backend && alembic history",
+    "migration:current": "cd backend && alembic current"
+  },
+  "private": true
+}

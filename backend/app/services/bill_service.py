@@ -25,9 +25,29 @@ class BillService:
         """Get a bill by ID."""
         return await self.repository.get_by_id(bill_id)
 
-    async def get_bills_by_branch(self, branch_id: int) -> List[Bill]:
-        """Get all bills for a branch."""
-        return await self.repository.get_by_branch(branch_id)
+    async def get_bills_by_branch(
+        self, 
+        branch_id: int, 
+        include_children: bool = False
+    ) -> List[Bill]:
+        """
+        Get all bills for a branch, optionally including children branches.
+        
+        Args:
+            branch_id: The branch ID to filter by
+            include_children: If True, includes bills from child branches
+            
+        Returns:
+            List of bills
+        """
+        if include_children:
+            # Get branch IDs including children
+            branch_ids = await self.branch_repository.get_branch_ids_for_filter(
+                branch_id, include_children=True
+            )
+            return await self.repository.get_by_branches(branch_ids)
+        else:
+            return await self.repository.get_by_branch(branch_id)
 
     async def get_bills_by_vendor(self, vendor_id: int) -> List[Bill]:
         """Get all bills from a vendor."""

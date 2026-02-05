@@ -147,6 +147,40 @@ Implementar interface React completa para consumir os endpoints backend.
 
 ---
 
+## 📋 ÉPICO 4: Feature Matriz-Filial (PLANEJADO)
+
+**Status:** 📋 **PLANNING** - Aguardando aprovação
+
+### Objetivo:
+Implementar hierarquia entre Matriz e Filiais, permitindo filtrar dados consolidados por matriz.
+
+### Escopo:
+- **Backend:** Adicionar relacionamento hierárquico ao modelo `Branch`
+- **Frontend:** Interface para visualizar hierarquia e filtrar por matriz+filiais
+- **Filtros:** Consolidar dados de bills/vendors/categories por matriz
+
+### Estimativa:
+- **Backend:** ~4 horas
+- **Frontend:** ~2 horas
+- **Total:** ~6 horas
+
+### Documentação:
+📄 **`FEATURE-MATRIZ-FILIAL.md`** - Especificação completa
+
+### Status Técnico:
+- [ ] Migration criada
+- [ ] Model atualizado
+- [ ] Repository implementado
+- [ ] Service com validações
+- [ ] Endpoints novos/modificados
+- [ ] Frontend com hierarquia visual
+- [ ] Filtro consolidado funcional
+- [ ] Testes
+
+**Aguardando aprovação para iniciar implementação.**
+
+---
+
 ## 🎯 Resumo Executivo
 
 ```
@@ -163,10 +197,14 @@ Implementar interface React completa para consumir os endpoints backend.
 │  ✅ ÉPICO 3: Frontend           COMPLETO    │
 │     └─ Hooks, Components, Pages, Routing      │
 │                                                │
+│  📋 ÉPICO 4: Matriz-Filial      PLANEJADO    │
+│     └─ Hierarquia + Filtro Consolidado        │
+│                                                │
 ├────────────────────────────────────────────────┤
-│  Total Estimado: 49-57 horas                   │
+│  Total Estimado: 49-57 horas (base)           │
 │  Status Atual: 54/57 horas concluídas (95%)   │
-│  Próximo: Testes (Fase 3.6) ou Deploy         │
+│  Feature Nova: +6 horas                        │
+│  Próximo: Aprovar Feature ou Deploy           │
 └────────────────────────────────────────────────┘
 ```
 

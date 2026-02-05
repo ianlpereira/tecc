@@ -5,6 +5,7 @@
 import apiClient from './apiClient';
 import type {
   Branch,
+  BranchWithChildren,
   BranchCreate,
   BranchUpdate,
   Vendor,
@@ -23,13 +24,25 @@ const API_PREFIX = '/api/v1';
 // ============ BRANCHES ============
 
 export const branchApi = {
-  getAll: async (): Promise<Branch[]> => {
-    const response = await apiClient.get(`${API_PREFIX}/branches`);
+  getAll: async (includeHierarchy = false): Promise<Branch[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/branches`, {
+      params: { include_hierarchy: includeHierarchy }
+    });
     return response.data;
   },
 
   getById: async (id: number): Promise<Branch> => {
     const response = await apiClient.get(`${API_PREFIX}/branches/${id}`);
+    return response.data;
+  },
+
+  getWithChildren: async (id: number): Promise<BranchWithChildren> => {
+    const response = await apiClient.get(`${API_PREFIX}/branches/${id}/with-children`);
+    return response.data;
+  },
+
+  getChildren: async (id: number): Promise<Branch[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/branches/${id}/children`);
     return response.data;
   },
 
@@ -107,13 +120,25 @@ export const categoryApi = {
 // ============ BILLS ============
 
 export const billApi = {
-  getAll: async (): Promise<Bill[]> => {
-    const response = await apiClient.get(`${API_PREFIX}/bills`);
+  getAll: async (branchId?: number, includeChildren = false): Promise<Bill[]> => {
+    const params: Record<string, any> = {};
+    if (branchId) {
+      params.branch_id = branchId;
+      params.include_children = includeChildren;
+    }
+    const response = await apiClient.get(`${API_PREFIX}/bills`, { params });
     return response.data;
   },
 
   getById: async (id: number): Promise<Bill> => {
     const response = await apiClient.get(`${API_PREFIX}/bills/${id}`);
+    return response.data;
+  },
+
+  getByBranch: async (branchId: number, includeChildren = false): Promise<Bill[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/bills/branch/${branchId}`, {
+      params: { include_children: includeChildren }
+    });
     return response.data;
   },
 
