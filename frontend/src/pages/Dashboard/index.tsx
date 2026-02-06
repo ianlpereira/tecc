@@ -25,34 +25,36 @@ const statusLabels: Record<BillStatus, string> = {
 
 export function DashboardPage(): React.ReactElement {
   const navigate = useNavigate();
-  const { data: bills, isLoading: billsLoading } = useBills();
-  const { data: branches, isLoading: branchesLoading } = useBranches();
-  const { data: vendors } = useVendors();
-  const { data: categories } = useCategories();
-  const { currentBranch } = useBranchStore();
+  const { currentBranch, includeChildren } = useBranchStore();
+  const { data: bills = [], isLoading: billsLoading } = useBills(
+    currentBranch?.id,
+    currentBranch?.is_headquarters ? includeChildren : false
+  );
+  const { data: branches = [], isLoading: branchesLoading } = useBranches();
+  const { data: vendors = [] } = useVendors();
+  const { data: categories = [] } = useCategories();
 
   const vendorMap = useMemo(() => {
-    return new Map(vendors?.map(v => [v.id, v.name]));
+    return new Map(vendors?.map((v: any) => [v.id, v.name]));
   }, [vendors]);
 
   const categoryMap = useMemo(() => {
-    return new Map(categories?.map(c => [c.id, c.name]));
+    return new Map(categories?.map((c: any) => [c.id, c.name]));
   }, [categories]);
 
   const filteredBills = useMemo(() => {
-    if (!bills) return [];
-    if (!currentBranch) return bills;
-    return bills.filter(bill => bill.branch_id === currentBranch.id);
-  }, [bills, currentBranch]);
+    // Bills are already filtered by the API with branch hierarchy
+    return bills.filter((bill: Bill) => bill.status !== BillStatus.CANCELLED);
+  }, [bills]);
 
   const stats = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const pending = filteredBills.filter(b => b.status === BillStatus.PENDING);
-    const overdue = pending.filter(b => new Date(b.due_date) < today);
-    const totalPending = pending.reduce((sum, b) => sum + b.amount, 0);
-    const totalOverdue = overdue.reduce((sum, b) => sum + b.amount, 0);
+    const pending = filteredBills.filter((b: Bill) => b.status === BillStatus.PENDING);
+    const overdue = pending.filter((b: Bill) => new Date(b.due_date) < today);
+    const totalPending = pending.reduce((sum: number, b: Bill) => sum + b.amount, 0);
+    const totalOverdue = overdue.reduce((sum: number, b: Bill) => sum + b.amount, 0);
 
     return {
       total: filteredBills.length,

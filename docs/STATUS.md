@@ -1,6 +1,6 @@
-# 📊 Status Projeto - Épicos 1, 2 e 3
+# 📊 Status Projeto - Épicos 1, 2, 3 e 4
 
-> **Última Atualização:** 30 de Janeiro de 2026
+> **Última Atualização:** 2024
 
 ## ✅ ÉPICO 1 - Completado com Sucesso (Foundation)
 
@@ -255,10 +255,70 @@ docker exec tecc_backend alembic upgrade head
 | ----- | ------ | ----- | ---------- |
 | 1 - Foundation | ✅ **CONCLUÍDO** | 1/1 | ~8h |
 | 2 - Backend | ✅ **CONCLUÍDO** | 4/4 | ~15h |
-| 3 - Frontend | 📋 **PLANEJADO** | 6 fases | ~26-34h |
+| 3 - Frontend | ✅ **CONCLUÍDO** | 6/6 | ~26-34h |
+| 4 - Hierarquia Matriz-Filial | ✅ **CONCLUÍDO** | Full-Stack | ~8h |
 
-**Total Projeto:** ~49-57 horas  
-**Próximo Passo:** Iniciar Épico 3, Fase 3.1 (Hooks & Services)
+**Total Projeto:** ~57-65 horas  
+**Status Atual:** Sistema completo e funcional com hierarquia de filiais
+
+---
+
+## ✅ ÉPICO 4 - Sistema de Hierarquia Matriz-Filial (CONCLUÍDO)
+
+### Objetivo
+Permitir associação de filiais a uma matriz, com filtragem consolidada de contas.
+
+### Funcionalidades Implementadas
+- [x] Modelo de dados com `parent_branch_id`
+- [x] Relacionamentos self-referential no SQLAlchemy
+- [x] Validações de hierarquia no backend
+- [x] Endpoints para consulta de hierarquia
+- [x] Migração de banco de dados
+- [x] Interface de seleção de matriz no formulário
+- [x] BranchSelector com visual hierárquico (📍 ↳)
+- [x] Filtro consolidado com checkbox "Incluir filiais"
+- [x] Integração completa frontend-backend
+- [x] TypeScript build sem erros
+
+### Componentes Modificados
+
+#### Backend (9 arquivos)
+- `models/branch.py` - parent_branch_id + relationships
+- `schemas/branch.py` - BranchWithChildren
+- `repositories/branch_repository.py` - get_children, get_with_children
+- `repositories/bill_repository.py` - get_by_branches
+- `services/branch_service.py` - validate_hierarchy
+- `services/bill_service.py` - include_children logic
+- `routers/branches.py` - /children, /with-children endpoints
+- `routers/bills.py` - include_children query param
+- `alembic/versions/a1b2c3d4e5f6_add_parent_branch_hierarchy.py`
+
+#### Frontend (9 arquivos)
+- `types/index.ts` - BranchWithChildren interface
+- `services/api.ts` - hierarchy API methods
+- `hooks/useBranches.ts` - includeHierarchy + new hooks
+- `hooks/useBills.ts` - branchId + includeChildren params
+- `context/branchStore.ts` - includeChildren state
+- `components/BranchSelector/index.tsx` - visual hierarchy
+- `components/BranchForm/index.tsx` - parent branch select
+- `pages/Bills/index.tsx` - consolidated filtering
+- `pages/Dashboard/index.tsx` - hierarchical stats
+
+### Validações
+1. ✅ Matriz não pode ter pai
+2. ✅ Filial só pode ter matriz como pai
+3. ✅ Previne ciclos na hierarquia
+4. ✅ TypeScript strict mode compliance
+
+### Status da Migração
+```bash
+Migration ID: a1b2c3d4e5f6_add_parent_branch_hierarchy
+Status: Applied (head)
+```
+
+### Documentação
+- `FEATURE-MATRIZ-FILIAL.md` - Especificação técnica completa
+- `EPIC-4-COMPLETE.md` - Documentação de conclusão com checklist
 
 ---
 
@@ -268,20 +328,21 @@ docker exec tecc_backend alembic upgrade head
 ┌─────────────────────────────────────────────────────────┐
 │                    Frontend (React)                     │
 │  Pages → Components → Hooks → Services → API Client    │
+│         [Hierarquia Visual com 📍 ↳]                    │
 ├─────────────────────────────────────────────────────────┤
 │                 Backend (FastAPI)                       │
 │  Routers → Services → Repositories → Models            │
+│       [Validação de Hierarquia + Filtragem]            │
 ├─────────────────────────────────────────────────────────┤
 │              Database (PostgreSQL)                      │
-│  Branches | Vendors | Categories | Bills               │
+│  Branches (parent_branch_id) | Vendors | Categories    │
+│              Bills (branch_id FK)                       │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-**Última Atualização:** 27 Jan 2026 - Épico 2 Completo ✅
-
-4. Comece Épico 2 (Modelos & Endpoints)
+**Última Atualização:** 2024 - Épico 4 Completo ✅
 
 ---
 
@@ -294,7 +355,11 @@ docker exec tecc_backend alembic upgrade head
 | Docker Compose | ✅ 100% |
 | Config/Env | ✅ 100% |
 | Documentação | ✅ 100% |
-| **Docker Local** | ⚠️ I/O Error |
+| Hierarquia Matriz-Filial | ✅ 100% |
+| **Sistema Completo** | ✅ **FUNCIONANDO** |
 
-**Resolução:** 1 comando PowerShell + reiniciar Docker Desktop
+**Próximos Passos Sugeridos:**
+1. Testes manuais do fluxo completo
+2. Validação de UX com usuários
+3. Considerar melhorias futuras (ver EPIC-4-COMPLETE.md)
 

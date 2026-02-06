@@ -19,12 +19,15 @@ const statusLabels: Record<BillStatus, string> = {
 };
 
 export function BillsPage(): React.ReactElement {
-  const { data: bills, isLoading } = useBills();
-  const { data: branches } = useBranches();
-  const { data: vendors } = useVendors();
-  const { data: categories } = useCategories();
+  const { currentBranch, includeChildren } = useBranchStore();
+  const { data: bills = [], isLoading } = useBills(
+    currentBranch?.id,
+    currentBranch?.is_headquarters ? includeChildren : false
+  );
+  const { data: branches = [] } = useBranches();
+  const { data: vendors = [] } = useVendors();
+  const { data: categories = [] } = useCategories();
   const { mutate: deleteBill } = useDeleteBill();
-  const { currentBranch } = useBranchStore();
   
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingBill, setEditingBill] = React.useState<Bill | null>(null);
@@ -45,16 +48,13 @@ export function BillsPage(): React.ReactElement {
   const filteredBills = useMemo(() => {
     let result = bills || [];
 
-    if (currentBranch) {
-      result = result.filter(bill => bill.branch_id === currentBranch.id);
-    }
-
+    // Filter by status if needed
     if (statusFilter !== 'all') {
-      result = result.filter(bill => bill.status === statusFilter);
+      result = result.filter((bill: Bill) => bill.status === statusFilter);
     }
 
     return result;
-  }, [bills, currentBranch, statusFilter]);
+  }, [bills, statusFilter]);
 
   const handleDelete = (id: number) => {
     deleteBill(id, {

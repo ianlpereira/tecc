@@ -8,10 +8,10 @@ import type { BillCreate, BillUpdate } from '../types';
 
 const QUERY_KEY = ['bills'];
 
-export function useBills() {
+export function useBills(branchId?: number, includeChildren = false) {
   return useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: billApi.getAll,
+    queryKey: [...QUERY_KEY, { branchId, includeChildren }],
+    queryFn: () => billApi.getAll(branchId, includeChildren),
   });
 }
 
