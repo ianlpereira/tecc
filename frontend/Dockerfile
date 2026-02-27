@@ -1,38 +1,43 @@
-FROM node:20-slim AS base
+# syntax=docker/dockerfile:1.4
+
+# ── base: instala dependências (cached enquanto package*.json não muda) ─────
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json package-lock.json* ./
 
-RUN npm install
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --prefer-offline
 
-COPY . .
-
-# Development stage
+# ── development ─────────────────────────────────────────────────────────────
 FROM base AS development
 
 ENV NODE_ENV=development
 
+COPY . .
+
 EXPOSE 5173
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
-# Build stage
+# ── builder: gera o dist estático ───────────────────────────────────────────
 FROM base AS builder
 
 ARG VITE_API_URL=http://localhost:8000
-
 ENV NODE_ENV=production
 ENV VITE_API_URL=$VITE_API_URL
 
+COPY . .
+
 RUN npm run build
 
-# Production stage
-FROM node:20-slim AS production
+# ── production: imagem mínima só com o dist ──────────────────────────────────
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
-RUN npm install -g serve
+RUN npm install -g serve --prefer-offline
 
 COPY --from=builder /app/dist ./dist
 

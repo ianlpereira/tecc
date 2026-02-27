@@ -1,28 +1,33 @@
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1.4
+FROM python:3.11-slim AS base
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    postgresql-client \
+# Install only essential system deps (asyncpg has pre-built wheels, no gcc needed)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# ── deps layer: cached as long as requirements.txt doesn't change ──────────
+FROM base AS deps
+
 COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# ── final production image ──────────────────────────────────────────────────
+FROM base AS production
 
-# Copy application
+# Copy installed packages from deps stage
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
+
+# Copy application code (changes most often — last layer)
 COPY . .
 
-# Copy and make entrypoint executable
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Expose port
 EXPOSE 8000
 
-# Run migrations and start app
 ENTRYPOINT ["/app/entrypoint.sh"]

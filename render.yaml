@@ -7,13 +7,14 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
-        value: postgresql+asyncpg://tecc_user:tecc_password@db:5432/tecc_db
+        sync: false
       - key: ENVIRONMENT
         value: production
       - key: DEBUG
         value: "false"
     dockerfilePath: ./backend/Dockerfile
-    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    dockerContext: ./backend
+    # entrypoint.sh already runs: alembic upgrade head && uvicorn
     autoDeploy: true
 
   - type: web
@@ -23,11 +24,14 @@ services:
     plan: starter
     envVars:
       - key: VITE_API_URL
-        value: https://tecc-backend.onrender.com
+        sync: false
       - key: NODE_ENV
         value: production
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
+    dockerBuildArgs:
+      - key: VITE_API_URL
+        value: https://tecc-backend.onrender.com
     autoDeploy: true
 
   - type: pserv
