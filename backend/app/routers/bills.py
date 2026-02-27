@@ -81,6 +81,9 @@ async def create_bill(
             schema.due_date,
             schema.invoice_number,
             schema.notes,
+            schema.is_recurring,
+            schema.recurrence_interval_days,
+            schema.recurrence_occurrences,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -108,6 +111,13 @@ async def update_bill(
         return updated
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/group/{group_id}", response_model=List[BillResponse])
+async def get_bills_by_recurrence_group(group_id: str, db: AsyncSession = Depends(get_db)):
+    """Get all bills belonging to a recurrence group, ordered by occurrence index."""
+    service = BillService(db)
+    return await service.get_bills_by_recurrence_group(group_id)
 
 
 @router.post("/{bill_id}/mark-paid", response_model=BillResponse)

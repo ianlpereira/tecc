@@ -1,6 +1,63 @@
-# 📊 Status Projeto - Épicos 1, 2, 3 e 4
+# 📊 Status Projeto - Épicos 1, 2, 3, 4, 5 e Feature Recorrência
 
-> **Última Atualização:** 2024
+> **Última Atualização:** 27 de Fevereiro de 2026
+
+---
+
+## 🚧 FEATURE: Contas Recorrentes (EM DESENVOLVIMENTO)
+
+> **Documentação completa:** `docs/FEATURE-RECORRENCIA.md`  
+> **Iniciado em:** 27/02/2026
+
+### Backend
+
+- [x] Model `Bill`: 5 novos campos (`is_recurring`, `recurrence_group_id`, `recurrence_interval_days`, `recurrence_total`, `recurrence_index`)
+- [x] Schemas `BillCreate` / `BillResponse`: campos de recorrência adicionados
+- [x] Migration Alembic: `b2c3d4e5f6a7_add_recurrence_fields_to_bills.py`
+- [x] Repository: `get_by_recurrence_group(group_id)`
+- [x] Service `create_bill()`: lógica de geração em loop com UUID de grupo
+- [x] Router: endpoint `GET /bills/group/{group_id}`
+
+### Frontend
+
+- [x] `types/index.ts`: campos de recorrência em `Bill` e `BillCreate`
+- [x] `api.ts`: método `billApi.getByGroup(groupId)`
+- [x] `BillForm`: checkbox "Conta Recorrente" + painel condicional com intervalo e ocorrências
+- [x] `Bills/index.tsx`: ícone 🔄 (SyncOutlined) com tooltip na coluna Descrição
+
+**Status: 🚧 EM DESENVOLVIMENTO — Aguardando execução da migration no banco**
+
+---
+
+## 🚧 ÉPICO 5 - UX & Bug Fixes (EM DESENVOLVIMENTO)
+
+> **Documentação completa:** `docs/EPIC-5-PLANNING.md`  
+> **Iniciado em:** 27/02/2026
+
+### Sprint 1 — Bugs Críticos
+
+- [x] **F6** — Fix bug: limite de ~2 fornecedores (`vendor_repository.py` + `vendor_service.py`)
+- [x] **F5** — Fix bug: e-mail obrigatório no fornecedor (`VendorForm/index.tsx`)
+- [x] **F3** — Fix bug: campo valor não aceita decimais pt-BR (`BillForm/index.tsx`)
+
+### Sprint 2 — Dashboard
+
+- [x] **F8** — Dashboard: tabela "Contas de Hoje" (`Dashboard/index.tsx`)
+- [x] **F4** — Dashboard: card "Vence Hoje" (`Dashboard/index.tsx`)
+- [x] **F9** — Dashboard: botão "Pago" para dar baixa rápida (`Dashboard/index.tsx` + `useBills.ts`)
+
+### Sprint 3 — Features de Produtividade
+
+- [x] **F1** — Múltiplas matrizes: removida restrição de 1 HQ (`branch_service.py`)
+- [x] **F2** — Botão Duplicar em Contas a Pagar e Fornecedores
+
+### Sprint 4 — UX Polish
+
+- [x] **F7** — Pesquisa de fornecedor melhorada no BillForm (`optionFilterProp`, `notFoundContent`, placeholder)
+
+**Status: ✅ CONCLUÍDO — 27/02/2026**
+
+---
 
 ## ✅ ÉPICO 1 - Completado com Sucesso (Foundation)
 

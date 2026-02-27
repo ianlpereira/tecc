@@ -8,7 +8,14 @@ import type { Vendor } from '../../types';
 
 const vendorSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  email: z.string().email('E-mail inválido').optional().nullable().or(z.literal('')),
+  email: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val: string | null | undefined) => val || null)
+    .refine((val: string | null | undefined) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: 'E-mail inválido',
+    }),
   phone: z.string().optional().nullable().or(z.literal('')),
   address: z.string().optional().nullable().or(z.literal('')),
 });
@@ -17,11 +24,12 @@ type VendorFormData = z.infer<typeof vendorSchema>;
 
 interface VendorFormProps {
   vendor?: Vendor | null;
+  initialValues?: Partial<Vendor> | null;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function VendorForm({ vendor, onSuccess, onCancel }: VendorFormProps): React.ReactElement {
+export function VendorForm({ vendor, initialValues, onSuccess, onCancel }: VendorFormProps): React.ReactElement {
   const { mutate: createVendor, isPending: isCreating } = useCreateVendor();
   const { mutate: updateVendor, isPending: isUpdating } = useUpdateVendor();
   const isLoading = isCreating || isUpdating;
@@ -35,10 +43,10 @@ export function VendorForm({ vendor, onSuccess, onCancel }: VendorFormProps): Re
   } = useForm<VendorFormData>({
     resolver: zodResolver(vendorSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
+      name: initialValues?.name ? `Cópia de ${initialValues.name}` : '',
+      email: initialValues?.email || '',
+      phone: initialValues?.phone || '',
+      address: initialValues?.address || '',
     },
   });
 

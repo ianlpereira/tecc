@@ -10,6 +10,51 @@
 
 ---
 
+## 🚧 Feature: Contas Recorrentes (EM DESENVOLVIMENTO)
+
+**Status:** 🚧 **IN PROGRESS** — Iniciado em 27/02/2026  
+**Documentação:** `docs/FEATURE-RECORRENCIA.md`
+
+### O que foi implementado:
+- ✅ **Backend** — 5 novos campos no model `Bill` (`is_recurring`, `recurrence_group_id`, `recurrence_interval_days`, `recurrence_total`, `recurrence_index`)
+- ✅ **Backend** — Schemas `BillCreate`/`BillResponse` com campos de recorrência
+- ✅ **Backend** — Migration Alembic `b2c3d4e5f6a7`
+- ✅ **Backend** — `BillService.create_bill()` gera N contas em loop com UUID de grupo
+- ✅ **Backend** — `GET /bills/group/{group_id}` para listar ocorrências do grupo
+- ✅ **Frontend** — `types/index.ts` com campos de recorrência em `Bill` e `BillCreate`
+- ✅ **Frontend** — `billApi.getByGroup()` em `api.ts`
+- ✅ **Frontend** — `BillForm`: checkbox "Conta Recorrente" + painel condicional com preview
+- ✅ **Frontend** — `Bills/index.tsx`: ícone 🔄 com tooltip em contas recorrentes
+
+### Pendente:
+- ⏳ Executar migration: `docker compose exec backend alembic upgrade head`
+
+---
+
+## ✅ Épico 5: UX & Bug Fixes (COMPLETO)
+
+**Status:** ✅ **DONE** — Concluído em 27/02/2026  
+**Documentação:** `docs/EPIC-5-PLANNING.md`
+
+### Bugs Corrigidos:
+- ✅ **F6** — Fix bug: limite de ~2 fornecedores (guard `email NULL` no repository + service)
+- ✅ **F5** — Fix bug: e-mail obrigatório no fornecedor (Zod schema reescrito)
+- ✅ **F3** — Fix bug: campo valor não aceita decimais pt-BR (`decimalSeparator`, `formatter`/`parser` corrigidos)
+
+### Dashboard Melhorado:
+- ✅ **F8** — Tabela "Contas de Hoje" (substituiu "Últimas Lançadas") com colunas: Filial | Categoria | Fornecedor | Descrição | Valor | Status
+- ✅ **F4** — Card KPI "Vence Hoje" adicionado (5 cards no total)
+- ✅ **F9** — Botão "Pago" com confirmação para dar baixa rápida diretamente no Dashboard
+
+### Features de Produtividade:
+- ✅ **F1** — Múltiplas Matrizes: removida restrição de 1 HQ por sistema
+- ✅ **F2** — Botão Duplicar (🗒️) em Contas a Pagar e Fornecedores
+
+### UX Polish:
+- ✅ **F7** — Pesquisa de fornecedor: `optionFilterProp`, placeholder e `notFoundContent` melhorados
+
+---
+
 ## ✅ Épico 1: Foundation (COMPLETO)
 
 **Status:** ✅ **DONE** - Docker e infraestrutura funcionando

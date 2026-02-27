@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, message } from 'antd';
-import { useForm, Controller } from 'react-hook-form';
+import { Form, Input, InputNumber, Select, DatePicker, Button, message, Checkbox, Row, Col, Alert } from 'antd';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dayjs from 'dayjs';
@@ -19,17 +19,21 @@ const billSchema = z.object({
   invoice_number: z.string().optional().nullable().or(z.literal('')),
   notes: z.string().optional().nullable().or(z.literal('')),
   status: z.nativeEnum(BillStatus).optional(),
+  is_recurring: z.boolean().optional().default(false),
+  recurrence_interval_days: z.number().min(1).nullable().optional(),
+  recurrence_occurrences: z.number().min(2).max(60).nullable().optional(),
 });
 
 type BillFormData = z.infer<typeof billSchema>;
 
 interface BillFormProps {
   bill?: Bill | null;
+  initialValues?: Partial<Bill> | null;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function BillForm({ bill, onSuccess, onCancel }: BillFormProps): React.ReactElement {
+export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormProps): React.ReactElement {
   const { mutate: createBill, isPending: isCreating } = useCreateBill();
   const { mutate: updateBill, isPending: isUpdating } = useUpdateBill();
   const { data: branches } = useBranches();
@@ -45,21 +49,29 @@ export function BillForm({ bill, onSuccess, onCancel }: BillFormProps): React.Re
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<BillFormData>({
     resolver: zodResolver(billSchema),
     defaultValues: {
-      branch_id: currentBranch?.id || 0,
-      vendor_id: 0,
-      category_id: 0,
-      description: '',
-      amount: 0,
+      branch_id: initialValues?.branch_id || currentBranch?.id || 0,
+      vendor_id: initialValues?.vendor_id || 0,
+      category_id: initialValues?.category_id || 0,
+      description: initialValues?.description || '',
+      amount: initialValues?.amount || 0,
       due_date: '',
-      invoice_number: '',
-      notes: '',
+      invoice_number: initialValues?.invoice_number || '',
+      notes: initialValues?.notes || '',
       status: BillStatus.PENDING,
+      is_recurring: false,
+      recurrence_interval_days: null,
+      recurrence_occurrences: null,
     },
   });
+
+  const isRecurring = watch('is_recurring');
+  const intervalDays = watch('recurrence_interval_days');
+  const occurrences = watch('recurrence_occurrences');
 
   useEffect(() => {
     if (bill) {
@@ -84,6 +96,9 @@ export function BillForm({ bill, onSuccess, onCancel }: BillFormProps): React.Re
       ...data,
       invoice_number: data.invoice_number || null,
       notes: data.notes || null,
+      is_recurring: data.is_recurring || false,
+      recurrence_interval_days: data.is_recurring ? data.recurrence_interval_days : null,
+      recurrence_occurrences: data.is_recurring ? data.recurrence_occurrences : null,
     };
 
     if (isEditing && bill) {
@@ -154,12 +169,14 @@ export function BillForm({ bill, onSuccess, onCancel }: BillFormProps): React.Re
           render={({ field }) => (
             <Select
               {...field}
-              placeholder="Selecione o fornecedor"
+              placeholder="Digite para pesquisar o fornecedor..."
               showSearch
-              filterOption={(input, option) =>
+              optionFilterProp="label"
+              filterOption={(input: string, option: any) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
-              options={vendors?.map(v => ({
+              notFoundContent="Fornecedor não encontrado"
+              options={vendors?.map((v: any) => ({
                 value: v.id,
                 label: v.name,
               }))}
@@ -219,8 +236,19 @@ export function BillForm({ bill, onSuccess, onCancel }: BillFormProps): React.Re
               step={0.01}
               precision={2}
               placeholder="0,00"
-              formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-              parser={value => value?.replace(/\./g, '').replace(',', '.') as unknown as number}
+              decimalSeparator=","
+              formatter={(value: number | string | undefined) => {
+                if (value === undefined || value === null || value === '') return '';
+                const parts = `${value}`.split('.');
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                return parts.join(',');
+              }}
+              parser={(value: string | undefined) => {
+                if (!value) return 0;
+                // Remove separadores de milhar (ponto), troca vírgula decimal por ponto
+                const cleaned = value.replace(/\./g, '').replace(',', '.');
+                return parseFloat(cleaned) || 0;
+              }}
             />
           )}
         />
@@ -277,6 +305,85 @@ export function BillForm({ bill, onSuccess, onCancel }: BillFormProps): React.Re
           )}
         />
       </Form.Item>
+
+      {!isEditing && (
+        <>
+          <Form.Item>
+            <Controller
+              name="is_recurring"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  checked={field.value || false}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                >
+                  Conta Recorrente
+                </Checkbox>
+              )}
+            />
+          </Form.Item>
+
+          {isRecurring && (
+            <div style={{ background: '#f6f8fa', padding: 16, borderRadius: 8, marginBottom: 16, border: '1px solid #d9d9d9' }}>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Intervalo (dias)"
+                    validateStatus={errors.recurrence_interval_days ? 'error' : ''}
+                    help={errors.recurrence_interval_days?.message}
+                  >
+                    <Controller
+                      name="recurrence_interval_days"
+                      control={control}
+                      render={({ field }) => (
+                        <InputNumber
+                          {...field}
+                          min={1}
+                          max={365}
+                          placeholder="Ex: 30"
+                          style={{ width: '100%' }}
+                          value={field.value ?? undefined}
+                        />
+                      )}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label="Número de Ocorrências"
+                    validateStatus={errors.recurrence_occurrences ? 'error' : ''}
+                    help={errors.recurrence_occurrences?.message}
+                  >
+                    <Controller
+                      name="recurrence_occurrences"
+                      control={control}
+                      render={({ field }) => (
+                        <InputNumber
+                          {...field}
+                          min={2}
+                          max={60}
+                          placeholder="Ex: 12"
+                          style={{ width: '100%' }}
+                          value={field.value ?? undefined}
+                        />
+                      )}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Alert
+                type="info"
+                showIcon
+                message={
+                  occurrences && intervalDays
+                    ? `Serão criadas ${occurrences} contas, a cada ${intervalDays} dia(s) a partir da data de vencimento`
+                    : 'Preencha o intervalo e o número de ocorrências'
+                }
+              />
+            </div>
+          )}
+        </>
+      )}
 
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={isLoading}>

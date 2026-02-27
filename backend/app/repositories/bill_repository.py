@@ -53,3 +53,12 @@ class BillRepository(BaseRepository[Bill]):
             select(Bill).where(Bill.invoice_number == invoice_number)
         )
         return result.scalar_one_or_none()
+
+    async def get_by_recurrence_group(self, group_id: str) -> List[Bill]:
+        """Get all bills belonging to a recurrence group, ordered by index."""
+        result = await self.db.execute(
+            select(Bill)
+            .where(Bill.recurrence_group_id == group_id)
+            .order_by(Bill.recurrence_index)
+        )
+        return result.scalars().all()

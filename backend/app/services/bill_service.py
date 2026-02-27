@@ -3,10 +3,11 @@ Bill service with business logic.
 """
 
 from typing import List, Optional
-from datetime import date
+from datetime import date, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Bill, BillStatus, Branch
 from app.repositories import BillRepository, BranchRepository
+import uuid
 
 
 class BillService:
@@ -67,8 +68,11 @@ class BillService:
         due_date: date,
         invoice_number: str = None,
         notes: str = None,
+        is_recurring: bool = False,
+        recurrence_interval_days: int = None,
+        recurrence_occurrences: int = None,
     ) -> Bill:
-        """Create a new bill."""
+        """Create a new bill. If is_recurring=True, generates N bills spaced by interval_days."""
         # Validate branch exists
         branch = await self.branch_repository.get_by_id(branch_id)
         if not branch:
@@ -86,6 +90,45 @@ class BillService:
         if amount <= 0:
             raise ValueError("Amount must be greater than 0")
 
+        # Validate recurrence parameters
+        if is_recurring:
+            if not recurrence_interval_days or recurrence_interval_days < 1:
+                raise ValueError("Intervalo de recorrência deve ser maior que 0")
+            if not recurrence_occurrences or not (2 <= recurrence_occurrences <= 60):
+                raise ValueError("Número de ocorrências deve ser entre 2 e 60")
+
+            group_id = str(uuid.uuid4())
+            first_bill = None
+
+            for i in range(recurrence_occurrences):
+                occurrence_due_date = due_date + timedelta(days=i * recurrence_interval_days)
+                bill = Bill(
+                    branch_id=branch_id,
+                    vendor_id=vendor_id,
+                    category_id=category_id,
+                    description=description,
+                    amount=amount,
+                    due_date=occurrence_due_date,
+                    invoice_number=None,  # invoice_number only on first if provided
+                    notes=notes,
+                    status=BillStatus.PENDING,
+                    is_recurring=True,
+                    recurrence_group_id=group_id,
+                    recurrence_interval_days=recurrence_interval_days,
+                    recurrence_total=recurrence_occurrences,
+                    recurrence_index=i + 1,
+                )
+                # Assign invoice_number only to the first occurrence
+                if i == 0 and invoice_number:
+                    bill.invoice_number = invoice_number
+
+                await self.repository.create(bill)
+                if first_bill is None:
+                    first_bill = bill
+
+            await self.repository.commit()
+            return first_bill
+
         bill = Bill(
             branch_id=branch_id,
             vendor_id=vendor_id,
@@ -100,6 +143,10 @@ class BillService:
         await self.repository.create(bill)
         await self.repository.commit()
         return bill
+
+    async def get_bills_by_recurrence_group(self, group_id: str) -> List[Bill]:
+        """Get all bills in a recurrence group, ordered by index."""
+        return await self.repository.get_by_recurrence_group(group_id)
 
     async def update_bill(
         self,

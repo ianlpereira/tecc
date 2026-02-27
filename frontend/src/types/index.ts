@@ -95,6 +95,11 @@ export interface Bill {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  is_recurring: boolean;
+  recurrence_group_id?: string | null;
+  recurrence_interval_days?: number | null;
+  recurrence_total?: number | null;
+  recurrence_index?: number | null;
 }
 
 export interface BillCreate {
@@ -106,6 +111,9 @@ export interface BillCreate {
   due_date: string;
   invoice_number?: string | null;
   notes?: string | null;
+  is_recurring?: boolean;
+  recurrence_interval_days?: number | null;
+  recurrence_occurrences?: number | null;
 }
 
 export interface BillUpdate {

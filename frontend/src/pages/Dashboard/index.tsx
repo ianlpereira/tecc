@@ -1,16 +1,18 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Spin, Button, Table } from 'antd';
+import { Spin, Button, Table, Popconfirm, message, Tooltip } from 'antd';
 import {
   FileTextOutlined,
   ClockCircleOutlined,
   DollarOutlined,
   ExclamationCircleOutlined,
+  CheckCircleOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
-import { useBills, useBranches, useVendors, useCategories } from '../../hooks';
+import { useBills, useBranches, useVendors, useCategories, useMarkBillAsPaid } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
@@ -33,6 +35,11 @@ export function DashboardPage(): React.ReactElement {
   const { data: branches = [], isLoading: branchesLoading } = useBranches();
   const { data: vendors = [] } = useVendors();
   const { data: categories = [] } = useCategories();
+  const { mutate: markAsPaid, isPending: isMarkingPaid } = useMarkBillAsPaid();
+
+  const branchMap = useMemo(() => {
+    return new Map(branches?.map((b: any) => [b.id, b.name]));
+  }, [branches]);
 
   const vendorMap = useMemo(() => {
     return new Map(vendors?.map((v: any) => [v.id, v.name]));
@@ -43,16 +50,28 @@ export function DashboardPage(): React.ReactElement {
   }, [categories]);
 
   const filteredBills = useMemo(() => {
-    // Bills are already filtered by the API with branch hierarchy
     return bills.filter((bill: Bill) => bill.status !== BillStatus.CANCELLED);
   }, [bills]);
+
+  // Normaliza uma string YYYY-MM-DD para início do dia local (sem offset de timezone)
+  const parseLocalDate = (dateStr: string): Date => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
 
   const stats = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const pending = filteredBills.filter((b: Bill) => b.status === BillStatus.PENDING);
-    const overdue = pending.filter((b: Bill) => new Date(b.due_date) < today);
+    const overdue = pending.filter((b: Bill) => parseLocalDate(b.due_date) < today);
+    const dueToday = filteredBills.filter((b: Bill) => {
+      const dueDate = parseLocalDate(b.due_date);
+      return (
+        dueDate.getTime() === today.getTime() &&
+        (b.status === BillStatus.PENDING || b.status === BillStatus.APPROVED)
+      );
+    });
     const totalPending = pending.reduce((sum: number, b: Bill) => sum + b.amount, 0);
     const totalOverdue = overdue.reduce((sum: number, b: Bill) => sum + b.amount, 0);
 
@@ -60,15 +79,20 @@ export function DashboardPage(): React.ReactElement {
       total: filteredBills.length,
       pending: pending.length,
       overdue: overdue.length,
+      dueToday: dueToday.length,
       totalPending,
       totalOverdue,
     };
   }, [filteredBills]);
 
-  const recentBills = useMemo(() => {
-    return [...filteredBills]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 5);
+  // Contas de hoje (due_date == hoje, qualquer status exceto CANCELLED)
+  const todayBills = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return filteredBills.filter((b: Bill) => {
+      const dueDate = parseLocalDate(b.due_date);
+      return dueDate.getTime() === today.getTime();
+    });
   }, [filteredBills]);
 
   const formatCurrency = (value: number) => {
@@ -78,7 +102,39 @@ export function DashboardPage(): React.ReactElement {
     }).format(value);
   };
 
+  const handleMarkAsPaid = (bill: Bill) => {
+    markAsPaid(bill.id, {
+      onSuccess: () => {
+        message.success(`Pagamento de "${bill.description}" registrado!`);
+      },
+      onError: () => {
+        message.error('Erro ao registrar pagamento');
+      },
+    });
+  };
+
   const columns: ColumnsType<Bill> = [
+    {
+      title: 'Filial',
+      dataIndex: 'branch_id',
+      key: 'branch_id',
+      render: (id: number) => branchMap.get(id) || '-',
+      ellipsis: true,
+    },
+    {
+      title: 'Categoria',
+      dataIndex: 'category_id',
+      key: 'category_id',
+      render: (id: number) => categoryMap.get(id) || '-',
+      ellipsis: true,
+    },
+    {
+      title: 'Fornecedor',
+      dataIndex: 'vendor_id',
+      key: 'vendor_id',
+      render: (id: number) => vendorMap.get(id) || '-',
+      ellipsis: true,
+    },
     {
       title: 'Descrição',
       dataIndex: 'description',
@@ -86,33 +142,53 @@ export function DashboardPage(): React.ReactElement {
       ellipsis: true,
     },
     {
-      title: 'Fornecedor',
-      dataIndex: 'vendor_id',
-      key: 'vendor_id',
-      render: (id: number) => vendorMap.get(id) || id,
-    },
-    {
-      title: 'Categoria',
-      dataIndex: 'category_id',
-      key: 'category_id',
-      render: (id: number) => categoryMap.get(id) || id,
-    },
-    {
       title: 'Valor',
       dataIndex: 'amount',
       key: 'amount',
       render: (value: number) => formatCurrency(value),
       align: 'right',
+      width: 130,
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      width: 110,
       render: (status: BillStatus) => (
         <S.StatusTag $status={status}>
           {statusLabels[status]}
         </S.StatusTag>
       ),
+    },
+    {
+      title: 'Ação',
+      key: 'action',
+      width: 90,
+      render: (_, record) => {
+        const canPay = record.status === BillStatus.PENDING || record.status === BillStatus.APPROVED;
+        if (!canPay) return null;
+        return (
+          <Popconfirm
+            title="Confirmar pagamento"
+            description={`Registrar pagamento de "${record.description}" (${formatCurrency(record.amount)})?`}
+            onConfirm={() => handleMarkAsPaid(record)}
+            okText="Confirmar"
+            cancelText="Cancelar"
+          >
+            <Tooltip title="Marcar como Pago">
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckCircleOutlined />}
+                loading={isMarkingPaid}
+                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+              >
+                Pago
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        );
+      },
     },
   ];
 
@@ -144,6 +220,16 @@ export function DashboardPage(): React.ReactElement {
         </S.StatCard>
 
         <S.StatCard>
+          <S.StatIcon $bg="#13c2c2">
+            <CalendarOutlined />
+          </S.StatIcon>
+          <S.StatLabel>Vence Hoje</S.StatLabel>
+          <S.StatValue $color={stats.dueToday > 0 ? '#13c2c2' : undefined}>
+            {stats.dueToday}
+          </S.StatValue>
+        </S.StatCard>
+
+        <S.StatCard>
           <S.StatIcon $bg="#faad14">
             <ClockCircleOutlined />
           </S.StatIcon>
@@ -169,26 +255,27 @@ export function DashboardPage(): React.ReactElement {
       </S.StatsGrid>
 
       <Card
-        title="Últimas Contas Lançadas"
+        title="📅 Contas de Hoje"
         extra={
           <Button type="link" onClick={() => navigate('/bills')}>
             Ver todas
           </Button>
         }
       >
-        {recentBills.length > 0 ? (
+        {todayBills.length > 0 ? (
           <Table
             columns={columns}
-            dataSource={recentBills}
+            dataSource={todayBills}
             rowKey="id"
             pagination={false}
             size="small"
+            scroll={{ x: 900 }}
           />
         ) : (
           <S.EmptyState>
-            <p>Nenhuma conta lançada ainda.</p>
-            <Button type="primary" onClick={() => navigate('/bills')}>
-              Lançar primeira conta
+            <p>🎉 Nenhuma conta vence hoje.</p>
+            <Button type="link" onClick={() => navigate('/bills')}>
+              Ver todas as contas
             </Button>
           </S.EmptyState>
         )}

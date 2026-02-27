@@ -23,7 +23,9 @@ class VendorRepository(BaseRepository[Vendor]):
         return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> Optional[Vendor]:
-        """Get vendor by email."""
+        """Get vendor by email. Returns None if email is empty or None."""
+        if not email or not email.strip():
+            return None
         result = await self.db.execute(
             select(Vendor).where(Vendor.email == email)
         )

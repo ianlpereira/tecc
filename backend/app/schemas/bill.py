@@ -23,7 +23,9 @@ class BillBase(BaseSchema):
 class BillCreate(BillBase):
     """Schema for creating a bill."""
 
-    pass
+    is_recurring: bool = False
+    recurrence_interval_days: int | None = None
+    recurrence_occurrences: int | None = None
 
 
 class BillUpdate(BaseSchema):
@@ -49,3 +51,8 @@ class BillResponse(TimestampedSchema):
     status: BillStatus
     invoice_number: str | None = None
     notes: str | None = None
+    is_recurring: bool = False
+    recurrence_group_id: str | None = None
+    recurrence_interval_days: int | None = None
+    recurrence_total: int | None = None
+    recurrence_index: int | None = None

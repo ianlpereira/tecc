@@ -5,6 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { billApi } from '../services/api';
 import type { BillCreate, BillUpdate } from '../types';
+import { BillStatus } from '../types';
 
 const QUERY_KEY = ['bills'];
 
@@ -51,6 +52,17 @@ export function useDeleteBill() {
 
   return useMutation({
     mutationFn: (id: number) => billApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+}
+
+export function useMarkBillAsPaid() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => billApi.update(id, { status: BillStatus.PAID }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },

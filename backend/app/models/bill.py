@@ -2,7 +2,7 @@
 Bill model for accounts payable.
 """
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum, Date
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum, Date, Boolean
 from app.models.base import BaseModel
 import enum
 from datetime import date
@@ -31,6 +31,13 @@ class Bill(BaseModel):
     status = Column(Enum(BillStatus), default=BillStatus.PENDING, nullable=False)
     invoice_number = Column(String(100), nullable=True)
     notes = Column(String(1000), nullable=True)
+
+    # Recurrence fields
+    is_recurring = Column(Boolean, default=False, nullable=False)
+    recurrence_group_id = Column(String(36), nullable=True, index=True)
+    recurrence_interval_days = Column(Integer, nullable=True)
+    recurrence_total = Column(Integer, nullable=True)
+    recurrence_index = Column(Integer, nullable=True)
 
     def __repr__(self) -> str:
         return f"<Bill(id={self.id}, branch_id={self.branch_id}, vendor_id={self.vendor_id}, amount={self.amount})>"

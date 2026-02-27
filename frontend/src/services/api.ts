@@ -155,4 +155,9 @@ export const billApi = {
   delete: async (id: number): Promise<void> => {
     await apiClient.delete(`${API_PREFIX}/bills/${id}`);
   },
+
+  getByGroup: async (groupId: string): Promise<Bill[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/bills/group/${groupId}`);
+    return response.data;
+  },
 };

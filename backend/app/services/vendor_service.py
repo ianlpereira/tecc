@@ -44,13 +44,13 @@ class VendorService:
         if existing:
             raise ValueError(f"Vendor with name '{name}' already exists")
 
-        # Check for duplicate email if provided
-        if email:
+        # Check for duplicate email only if a non-empty email was provided
+        if email and email.strip():
             existing_email = await self.repository.get_by_email(email)
             if existing_email:
                 raise ValueError(f"Vendor with email '{email}' already exists")
 
-        vendor = Vendor(name=name, email=email, phone=phone, address=address)
+        vendor = Vendor(name=name, email=email or None, phone=phone, address=address)
         await self.repository.create(vendor)
         await self.repository.commit()
         return vendor

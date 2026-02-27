@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, Button, Modal, Popconfirm, message } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
@@ -14,6 +14,7 @@ export function VendorsPage(): React.ReactElement {
   const { mutate: deleteVendor } = useDeleteVendor();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingVendor, setEditingVendor] = React.useState<Vendor | null>(null);
+  const [duplicatingVendor, setDuplicatingVendor] = React.useState<Vendor | null>(null);
 
   const handleDelete = (id: number) => {
     deleteVendor(id, {
@@ -28,17 +29,26 @@ export function VendorsPage(): React.ReactElement {
 
   const handleEdit = (vendor: Vendor) => {
     setEditingVendor(vendor);
+    setDuplicatingVendor(null);
+    setIsModalOpen(true);
+  };
+
+  const handleDuplicate = (vendor: Vendor) => {
+    setEditingVendor(null);
+    setDuplicatingVendor(vendor);
     setIsModalOpen(true);
   };
 
   const handleCreate = () => {
     setEditingVendor(null);
+    setDuplicatingVendor(null);
     setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingVendor(null);
+    setDuplicatingVendor(null);
   };
 
   const columns: ColumnsType<Vendor> = [
@@ -68,13 +78,19 @@ export function VendorsPage(): React.ReactElement {
     {
       title: 'Ações',
       key: 'actions',
-      width: 120,
-      render: (_, record) => (
+      width: 130,
+      render: (_: unknown, record: Vendor) => (
         <S.TableActions>
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
+          />
+          <Button
+            type="text"
+            icon={<CopyOutlined />}
+            onClick={() => handleDuplicate(record)}
+            title="Duplicar"
           />
           <Popconfirm
             title="Excluir fornecedor"
@@ -110,7 +126,7 @@ export function VendorsPage(): React.ReactElement {
       </Card>
 
       <Modal
-        title={editingVendor ? 'Editar Fornecedor' : 'Novo Fornecedor'}
+        title={editingVendor ? 'Editar Fornecedor' : duplicatingVendor ? 'Duplicar Fornecedor' : 'Novo Fornecedor'}
         open={isModalOpen}
         onCancel={handleModalClose}
         footer={null}
@@ -119,6 +135,7 @@ export function VendorsPage(): React.ReactElement {
       >
         <VendorForm
           vendor={editingVendor}
+          initialValues={duplicatingVendor ?? undefined}
           onSuccess={handleModalClose}
           onCancel={handleModalClose}
         />

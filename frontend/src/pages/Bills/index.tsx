@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Table, Button, Modal, Select, Popconfirm, message } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Select, Popconfirm, message, Tooltip } from 'antd';
+import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
@@ -31,6 +31,7 @@ export function BillsPage(): React.ReactElement {
   
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingBill, setEditingBill] = React.useState<Bill | null>(null);
+  const [duplicatingBill, setDuplicatingBill] = React.useState<Bill | null>(null);
   const [statusFilter, setStatusFilter] = React.useState<BillStatus | 'all'>('all');
 
   const branchMap = useMemo(() => {
@@ -69,17 +70,26 @@ export function BillsPage(): React.ReactElement {
 
   const handleEdit = (bill: Bill) => {
     setEditingBill(bill);
+    setDuplicatingBill(null);
+    setIsModalOpen(true);
+  };
+
+  const handleDuplicate = (bill: Bill) => {
+    setEditingBill(null);
+    setDuplicatingBill(bill);
     setIsModalOpen(true);
   };
 
   const handleCreate = () => {
     setEditingBill(null);
+    setDuplicatingBill(null);
     setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingBill(null);
+    setDuplicatingBill(null);
   };
 
   const formatCurrency = (value: number) => {
@@ -119,6 +129,18 @@ export function BillsPage(): React.ReactElement {
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
+      render: (desc: string, record: Bill) => (
+        <span>
+          {record.is_recurring && (
+            <Tooltip
+              title={`Recorrente: ocorrência ${record.recurrence_index}/${record.recurrence_total} (a cada ${record.recurrence_interval_days} dia(s))`}
+            >
+              <SyncOutlined style={{ color: '#1890ff', marginRight: 6 }} />
+            </Tooltip>
+          )}
+          {desc}
+        </span>
+      ),
     },
     {
       title: 'Valor',
@@ -146,13 +168,19 @@ export function BillsPage(): React.ReactElement {
     {
       title: 'Ações',
       key: 'actions',
-      width: 100,
-      render: (_, record) => (
+      width: 120,
+      render: (_: unknown, record: Bill) => (
         <S.TableActions>
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
+          />
+          <Button
+            type="text"
+            icon={<CopyOutlined />}
+            onClick={() => handleDuplicate(record)}
+            title="Duplicar"
           />
           <Popconfirm
             title="Excluir conta"
@@ -204,7 +232,7 @@ export function BillsPage(): React.ReactElement {
       </Card>
 
       <Modal
-        title={editingBill ? 'Editar Conta' : 'Nova Conta'}
+        title={editingBill ? 'Editar Conta' : duplicatingBill ? 'Duplicar Conta' : 'Nova Conta'}
         open={isModalOpen}
         onCancel={handleModalClose}
         footer={null}
@@ -213,6 +241,7 @@ export function BillsPage(): React.ReactElement {
       >
         <BillForm
           bill={editingBill}
+          initialValues={duplicatingBill ?? undefined}
           onSuccess={handleModalClose}
           onCancel={handleModalClose}
         />

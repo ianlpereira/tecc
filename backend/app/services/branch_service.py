@@ -102,18 +102,9 @@ class BranchService:
         is_headquarters: bool = False,
         parent_branch_id: Optional[int] = None
     ) -> Branch:
-        """Create a new branch."""
-        # Validate hierarchy
+        """Create a new branch. Multiple headquarters are allowed."""
+        # Validate hierarchy (parent must be HQ if provided, no circular refs)
         await self.validate_hierarchy(is_headquarters, parent_branch_id)
-        
-        # Ensure only one headquarters
-        if is_headquarters:
-            hq = await self.repository.get_headquarters()
-            if hq:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Headquarters branch already exists"
-                )
 
         branch = Branch(
             name=name, 
@@ -147,13 +138,6 @@ class BranchService:
         if name is not None:
             update_data["name"] = name
         if is_headquarters is not None:
-            if is_headquarters:
-                hq = await self.repository.get_headquarters()
-                if hq and hq.id != branch_id:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Headquarters branch already exists"
-                    )
             update_data["is_headquarters"] = is_headquarters
         if parent_branch_id is not None:
             update_data["parent_branch_id"] = parent_branch_id
