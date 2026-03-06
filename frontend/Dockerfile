@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.4
-
 # ── base: instala dependências (cached enquanto package*.json não muda) ─────
 FROM node:20-alpine AS base
 
@@ -7,8 +5,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --prefer-offline
+RUN npm install --prefer-offline
 
 # ── development ─────────────────────────────────────────────────────────────
 FROM base AS development

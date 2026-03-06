@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.4
 FROM python:3.11-slim AS base
 
 WORKDIR /app
@@ -12,8 +11,7 @@ RUN apt-get update \
 FROM base AS deps
 
 COPY requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # ── final production image ──────────────────────────────────────────────────
 FROM base AS production
