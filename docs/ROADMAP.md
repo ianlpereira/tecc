@@ -10,7 +10,22 @@
 
 ---
 
-## ✅ Épico 6: Funcionalidades Avançadas (COMPLETO)
+## ✅ Épico 7: Controle de Frota de Veículos (COMPLETO)
+
+**Status:** ✅ **DONE** — Concluído em 06/03/2026
+**Documentação:** `docs/EPIC-7-VEHICLES.md`
+
+### O que foi implementado:
+- ✅ **Backend** — Tabela `vehicles` (placa única, marca, modelo, ano, filial, obs)
+- ✅ **Backend** — FK `vehicle_id` nullable em `bills`
+- ✅ **Backend** — CRUD completo `/api/v1/vehicles` + endpoint aninhado `/{id}/bills`
+- ✅ **Backend** — `BillService.create_bill()` aceita `vehicle_id`; `get_bills_by_vehicle()`
+- ✅ **Backend** — Migration `0f1f3b804c93` aplicada
+- ✅ **Frontend** — `VehiclesPage` com tabela CRUD + modal de formulário + modal de detalhe (Tabs: Contas / Informações)
+- ✅ **Frontend** — `BillForm` com campo Veículo opcional
+- ✅ **Frontend** — Menu lateral com item "Veículos" e rota `/vehicles`
+
+---
 
 **Status:** ✅ **DONE** — Concluído em 01/03/2026  
 **Documentação:** `docs/EPIC-6-PLANNING.md`

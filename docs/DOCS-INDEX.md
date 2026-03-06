@@ -20,11 +20,26 @@
 - **Arquivo:** `EPIC-2-PLANNING.md`
 - **Status:** ✅ Completo e testado
 
-### 📋 ÉPICO 3: Frontend
+### ✅ ÉPICO 3: Frontend
 - **Resumo:** `EPIC-3-SUMMARY.md` (rápido)
 - **Detalhes:** `EPIC-3-PLANNING.md` (completo)
-- **Próximos passos:** `EPIC-3-START.md`
-- **Status:** Em planejamento
+- **Status:** ✅ Completo
+
+### ✅ ÉPICO 4: Hierarquia Matriz-Filial
+- **Arquivo:** `EPIC-4-COMPLETE.md`
+- **Status:** ✅ Completo
+
+### ✅ ÉPICO 5: UX & Bug Fixes
+- **Arquivo:** `ROADMAP.md` (seção Épico 5)
+- **Status:** ✅ Completo
+
+### ✅ ÉPICO 6: Funcionalidades Avançadas
+- **Arquivo:** `ROADMAP.md` (seção Épico 6)
+- **Status:** ✅ Completo
+
+### ✅ ÉPICO 7: Controle de Frota de Veículos
+- **Arquivo:** `EPIC-7-VEHICLES.md`
+- **Status:** ✅ Completo — 06/03/2026
 
 ---
 
