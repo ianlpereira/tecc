@@ -38,6 +38,11 @@ class Bill(BaseModel):
     recurrence_interval_days = Column(Integer, nullable=True)
     recurrence_total = Column(Integer, nullable=True)
     recurrence_index = Column(Integer, nullable=True)
+    recurrence_day_of_month = Column(Integer, nullable=True)  # 1-28, fixed day mode
+
+    # Payment fields
+    payment_bank = Column(String(100), nullable=True)
+    paid_at = Column(Date, nullable=True)
 
     def __repr__(self) -> str:
         return f"<Bill(id={self.id}, branch_id={self.branch_id}, vendor_id={self.vendor_id}, amount={self.amount})>"

@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Spin, Button, Table, Popconfirm, message, Tooltip } from 'antd';
+import { Spin, Button, Table, Modal, Select, message, Tooltip, Form, DatePicker } from 'antd';
 import {
   FileTextOutlined,
   ClockCircleOutlined,
@@ -10,6 +10,7 @@ import {
   CalendarOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
 import { useBills, useBranches, useVendors, useCategories, useMarkBillAsPaid } from '../../hooks';
@@ -17,6 +18,11 @@ import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
 import * as S from '../../components/common/styles';
+
+const BANKS = [
+  'Bradesco', 'Itaú', 'Santander', 'Caixa', 'Banco do Brasil',
+  'Nubank', 'Inter', 'C6', 'Sicredi', 'Sicoob', 'Outro',
+];
 
 const statusLabels: Record<BillStatus, string> = {
   [BillStatus.PENDING]: 'Pendente',
@@ -35,7 +41,12 @@ export function DashboardPage(): React.ReactElement {
   const { data: branches = [], isLoading: branchesLoading } = useBranches();
   const { data: vendors = [] } = useVendors();
   const { data: categories = [] } = useCategories();
-  const { mutate: markAsPaid, isPending: isMarkingPaid } = useMarkBillAsPaid();
+  const { mutate: markAsPaid } = useMarkBillAsPaid();
+
+  // F2: Pay modal state
+  const [payModalBill, setPayModalBill] = useState<Bill | null>(null);
+  const [payBank, setPayBank] = useState<string | undefined>(undefined);
+  const [payDate, setPayDate] = useState<dayjs.Dayjs>(dayjs());
 
   const branchMap = useMemo(() => {
     return new Map(branches?.map((b: any) => [b.id, b.name]));
@@ -103,14 +114,31 @@ export function DashboardPage(): React.ReactElement {
   };
 
   const handleMarkAsPaid = (bill: Bill) => {
-    markAsPaid(bill.id, {
-      onSuccess: () => {
-        message.success(`Pagamento de "${bill.description}" registrado!`);
+    setPayModalBill(bill);
+    setPayBank(undefined);
+    setPayDate(dayjs());
+  };
+
+  const handleConfirmPayment = () => {
+    if (!payModalBill) return;
+    markAsPaid(
+      {
+        id: payModalBill.id,
+        payload: {
+          payment_bank: payBank || null,
+          paid_at: payDate ? payDate.format('YYYY-MM-DD') : null,
+        },
       },
-      onError: () => {
-        message.error('Erro ao registrar pagamento');
-      },
-    });
+      {
+        onSuccess: () => {
+          message.success(`Pagamento de "${payModalBill.description}" registrado!`);
+          setPayModalBill(null);
+        },
+        onError: () => {
+          message.error('Erro ao registrar pagamento');
+        },
+      }
+    );
   };
 
   const columns: ColumnsType<Bill> = [
@@ -168,25 +196,17 @@ export function DashboardPage(): React.ReactElement {
         const canPay = record.status === BillStatus.PENDING || record.status === BillStatus.APPROVED;
         if (!canPay) return null;
         return (
-          <Popconfirm
-            title="Confirmar pagamento"
-            description={`Registrar pagamento de "${record.description}" (${formatCurrency(record.amount)})?`}
-            onConfirm={() => handleMarkAsPaid(record)}
-            okText="Confirmar"
-            cancelText="Cancelar"
-          >
-            <Tooltip title="Marcar como Pago">
-              <Button
-                type="primary"
-                size="small"
-                icon={<CheckCircleOutlined />}
-                loading={isMarkingPaid}
-                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-              >
-                Pago
-              </Button>
-            </Tooltip>
-          </Popconfirm>
+          <Tooltip title="Marcar como Pago">
+            <Button
+              type="primary"
+              size="small"
+              icon={<CheckCircleOutlined />}
+              onClick={() => handleMarkAsPaid(record)}
+              style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+            >
+              Pago
+            </Button>
+          </Tooltip>
         );
       },
     },
@@ -302,6 +322,44 @@ export function DashboardPage(): React.ReactElement {
           )}
         </S.StatsGrid>
       </div>
+
+      {/* F2: Payment modal */}
+      <Modal
+        title={`Registrar Pagamento — ${payModalBill?.description ?? ''}`}
+        open={!!payModalBill}
+        onOk={handleConfirmPayment}
+        onCancel={() => setPayModalBill(null)}
+        okText="Confirmar Pagamento"
+        cancelText="Cancelar"
+        confirmLoading={false}
+        width={420}
+      >
+        <Form layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item label="Banco / Forma de Pagamento">
+            <Select
+              placeholder="Selecione o banco (opcional)"
+              allowClear
+              value={payBank}
+              onChange={(v) => setPayBank(v)}
+              options={BANKS.map((b) => ({ value: b, label: b }))}
+            />
+          </Form.Item>
+          <Form.Item label="Data do Pagamento">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY"
+              value={payDate}
+              onChange={(d) => d && setPayDate(d)}
+              allowClear={false}
+            />
+          </Form.Item>
+          {payModalBill && (
+            <p style={{ color: '#666', fontSize: 13 }}>
+              Valor: <strong>{formatCurrency(payModalBill.amount)}</strong>
+            </p>
+          )}
+        </Form>
+      </Modal>
     </Layout>
   );
 }

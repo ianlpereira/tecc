@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Table, Button, Modal, Select, Popconfirm, message, Tooltip } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Select, Popconfirm, message, Tooltip, Badge, Space } from 'antd';
+import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined, PaperClipOutlined, FilterOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
@@ -33,6 +33,9 @@ export function BillsPage(): React.ReactElement {
   const [editingBill, setEditingBill] = React.useState<Bill | null>(null);
   const [duplicatingBill, setDuplicatingBill] = React.useState<Bill | null>(null);
   const [statusFilter, setStatusFilter] = React.useState<BillStatus | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = React.useState<number | 'all'>('all');
+  const [vendorFilter, setVendorFilter] = React.useState<number | 'all'>('all');
+  const [branchFilter, setBranchFilter] = React.useState<number | 'all'>('all');
 
   const branchMap = useMemo(() => {
     return new Map(branches?.map(b => [b.id, b.name]));
@@ -49,13 +52,31 @@ export function BillsPage(): React.ReactElement {
   const filteredBills = useMemo(() => {
     let result = bills || [];
 
-    // Filter by status if needed
     if (statusFilter !== 'all') {
       result = result.filter((bill: Bill) => bill.status === statusFilter);
     }
+    if (categoryFilter !== 'all') {
+      result = result.filter((bill: Bill) => bill.category_id === categoryFilter);
+    }
+    if (vendorFilter !== 'all') {
+      result = result.filter((bill: Bill) => bill.vendor_id === vendorFilter);
+    }
+    if (branchFilter !== 'all') {
+      result = result.filter((bill: Bill) => bill.branch_id === branchFilter);
+    }
 
     return result;
-  }, [bills, statusFilter]);
+  }, [bills, statusFilter, categoryFilter, vendorFilter, branchFilter]);
+
+  const hasActiveFilters =
+    statusFilter !== 'all' || categoryFilter !== 'all' || vendorFilter !== 'all' || branchFilter !== 'all';
+
+  const handleClearFilters = () => {
+    setStatusFilter('all');
+    setCategoryFilter('all');
+    setVendorFilter('all');
+    setBranchFilter('all');
+  };
 
   const handleDelete = (id: number) => {
     deleteBill(id, {
@@ -133,12 +154,23 @@ export function BillsPage(): React.ReactElement {
         <span>
           {record.is_recurring && (
             <Tooltip
-              title={`Recorrente: ocorrência ${record.recurrence_index}/${record.recurrence_total} (a cada ${record.recurrence_interval_days} dia(s))`}
+              title={
+                record.recurrence_day_of_month
+                  ? `Recorrente: ocorrência ${record.recurrence_index}/${record.recurrence_total} (todo dia ${record.recurrence_day_of_month})`
+                  : `Recorrente: ocorrência ${record.recurrence_index}/${record.recurrence_total} (a cada ${record.recurrence_interval_days} dia(s))`
+              }
             >
               <SyncOutlined style={{ color: '#1890ff', marginRight: 6 }} />
             </Tooltip>
           )}
           {desc}
+          {!!record.attachments_count && record.attachments_count > 0 && (
+            <Tooltip title={`${record.attachments_count} anexo(s)`}>
+              <Badge count={record.attachments_count} size="small" style={{ marginLeft: 8, backgroundColor: '#52c41a' }}>
+                <PaperClipOutlined style={{ color: '#52c41a', marginLeft: 4 }} />
+              </Badge>
+            </Tooltip>
+          )}
         </span>
       ),
     },
@@ -207,7 +239,7 @@ export function BillsPage(): React.ReactElement {
 
       <S.FilterBar>
         <Select
-          style={{ width: 200 }}
+          style={{ width: 180 }}
           value={statusFilter}
           onChange={setStatusFilter}
           options={[
@@ -218,6 +250,50 @@ export function BillsPage(): React.ReactElement {
             { value: BillStatus.CANCELLED, label: 'Cancelada' },
           ]}
         />
+        <Select
+          style={{ width: 180 }}
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          showSearch
+          optionFilterProp="label"
+          options={[
+            { value: 'all', label: 'Todas as Categorias' },
+            ...(categories?.map(c => ({ value: c.id, label: c.name })) ?? []),
+          ]}
+        />
+        <Select
+          style={{ width: 200 }}
+          value={vendorFilter}
+          onChange={setVendorFilter}
+          showSearch
+          optionFilterProp="label"
+          options={[
+            { value: 'all', label: 'Todos os Fornecedores' },
+            ...(vendors?.map(v => ({ value: v.id, label: v.name })) ?? []),
+          ]}
+        />
+        <Select
+          style={{ width: 180 }}
+          value={branchFilter}
+          onChange={setBranchFilter}
+          showSearch
+          optionFilterProp="label"
+          options={[
+            { value: 'all', label: 'Todas as Filiais' },
+            ...(branches?.map(b => ({
+              value: b.id,
+              label: b.is_headquarters ? `${b.name} (Matriz)` : b.name,
+            })) ?? []),
+          ]}
+        />
+        {hasActiveFilters && (
+          <Button onClick={handleClearFilters} icon={<FilterOutlined />}>
+            Limpar Filtros
+          </Button>
+        )}
+        <Space style={{ marginLeft: 'auto', color: '#999', fontSize: 12 }}>
+          Exibindo {filteredBills.length} de {bills.length} contas
+        </Space>
       </S.FilterBar>
 
       <Card>

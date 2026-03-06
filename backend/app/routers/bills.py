@@ -8,10 +8,17 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.schemas import BillCreate, BillUpdate, BillResponse
+from app.schemas.base import BaseSchema
 from app.services import BillService
 from app.models import BillStatus
 
 router = APIRouter(prefix="/api/v1/bills", tags=["bills"])
+
+
+class MarkPaidRequest(BaseSchema):
+    """Optional payload for marking a bill as paid."""
+    payment_bank: str | None = None
+    paid_at: date | None = None
 
 
 @router.get("/", response_model=List[BillResponse])
@@ -84,6 +91,7 @@ async def create_bill(
             schema.is_recurring,
             schema.recurrence_interval_days,
             schema.recurrence_occurrences,
+            schema.recurrence_day_of_month,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -121,10 +129,14 @@ async def get_bills_by_recurrence_group(group_id: str, db: AsyncSession = Depend
 
 
 @router.post("/{bill_id}/mark-paid", response_model=BillResponse)
-async def mark_bill_paid(bill_id: int, db: AsyncSession = Depends(get_db)):
-    """Mark a bill as paid."""
+async def mark_bill_paid(
+    bill_id: int,
+    payload: MarkPaidRequest = MarkPaidRequest(),
+    db: AsyncSession = Depends(get_db),
+):
+    """Mark a bill as paid, optionally recording bank and payment date."""
     service = BillService(db)
-    updated = await service.mark_bill_paid(bill_id)
+    updated = await service.mark_bill_paid(bill_id, payload.payment_bank, payload.paid_at)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill not found")
     return updated

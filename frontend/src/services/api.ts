@@ -17,6 +17,8 @@ import type {
   Bill,
   BillCreate,
   BillUpdate,
+  MarkPaidPayload,
+  BillAttachment,
 } from '../types';
 
 const API_PREFIX = '/api/v1';
@@ -159,5 +161,40 @@ export const billApi = {
   getByGroup: async (groupId: string): Promise<Bill[]> => {
     const response = await apiClient.get(`${API_PREFIX}/bills/group/${groupId}`);
     return response.data;
+  },
+
+  markAsPaid: async (id: number, payload?: MarkPaidPayload): Promise<Bill> => {
+    const response = await apiClient.post(`${API_PREFIX}/bills/${id}/mark-paid`, payload ?? {});
+    return response.data;
+  },
+};
+
+// ============ BILL ATTACHMENTS ============
+
+export const billAttachmentApi = {
+  list: async (billId: number): Promise<BillAttachment[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/bills/${billId}/attachments/`);
+    return response.data;
+  },
+
+  upload: async (billId: number, file: File): Promise<BillAttachment> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post(`${API_PREFIX}/bills/${billId}/attachments/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  download: async (billId: number, attachmentId: number): Promise<Blob> => {
+    const response = await apiClient.get(
+      `${API_PREFIX}/bills/${billId}/attachments/${attachmentId}/download`,
+      { responseType: 'blob' }
+    );
+    return response.data;
+  },
+
+  delete: async (billId: number, attachmentId: number): Promise<void> => {
+    await apiClient.delete(`${API_PREFIX}/bills/${billId}/attachments/${attachmentId}`);
   },
 };

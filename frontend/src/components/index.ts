@@ -5,3 +5,4 @@ export { BranchForm } from './BranchForm';
 export { VendorForm } from './VendorForm';
 export { CategoryForm } from './CategoryForm';
 export { BillForm } from './BillForm';
+export { BillAttachments } from './BillAttachments';

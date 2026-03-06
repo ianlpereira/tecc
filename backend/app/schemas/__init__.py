@@ -27,6 +27,10 @@ from app.schemas.bill import (
     BillUpdate,
     BillResponse,
 )
+from app.schemas.bill_attachment import (
+    BillAttachmentResponse,
+    BillAttachmentWithData,
+)
 
 __all__ = [
     "BaseSchema",
@@ -47,4 +51,6 @@ __all__ = [
     "BillCreate",
     "BillUpdate",
     "BillResponse",
+    "BillAttachmentResponse",
+    "BillAttachmentWithData",
 ]

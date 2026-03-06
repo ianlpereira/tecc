@@ -10,7 +10,33 @@
 
 ---
 
-## 🚧 Feature: Contas Recorrentes (EM DESENVOLVIMENTO)
+## ✅ Épico 6: Funcionalidades Avançadas (COMPLETO)
+
+**Status:** ✅ **DONE** — Concluído em 01/03/2026  
+**Documentação:** `docs/EPIC-6-PLANNING.md`
+
+### F1 — Anexar Arquivos a Contas
+- ✅ **Backend** — Tabela `bill_attachments` (base64, max 5MB, max 3 por conta)
+- ✅ **Backend** — Endpoints: upload multipart, list, download blob, delete
+- ✅ **Frontend** — Componente `<BillAttachments>` com dragger AntD, lista download/excluir
+- ✅ **Frontend** — Seção "Anexos" no `BillForm` ao editar; badge 📎 na listagem
+
+### F2 — Banco ao Marcar como Pago
+- ✅ **Backend** — Campos `payment_bank` + `paid_at` em `bills`; `POST /mark-paid` com corpo opcional
+- ✅ **Frontend** — Botão "Pago" no Dashboard abre modal com seletor de banco + datepicker
+
+### F3 — Recorrência por Dia Fixo do Mês
+- ✅ **Backend** — Campo `recurrence_day_of_month`; service usa `relativedelta` para gerar datas exatas
+- ✅ **Frontend** — `BillForm`: radio "Intervalo" vs "Dia fixo do mês" + preview dinâmico
+
+### F4 — Filtros Avançados em Contas a Pagar
+- ✅ **Frontend** — 4 filtros independentes: Status, Categoria, Fornecedor, Filial + "Limpar Filtros" + contador
+
+### ⚡ Deploy
+- ✅ Migration `c3d4e5f6a7b8_epic6_fields.py` criada
+- ⏳ Executar: `docker compose exec backend alembic upgrade head`
+
+---
 
 **Status:** 🚧 **IN PROGRESS** — Iniciado em 27/02/2026  
 **Documentação:** `docs/FEATURE-RECORRENCIA.md`

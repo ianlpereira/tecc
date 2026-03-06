@@ -100,6 +100,10 @@ export interface Bill {
   recurrence_interval_days?: number | null;
   recurrence_total?: number | null;
   recurrence_index?: number | null;
+  recurrence_day_of_month?: number | null;
+  payment_bank?: string | null;
+  paid_at?: string | null;
+  attachments_count?: number;
 }
 
 export interface BillCreate {
@@ -114,6 +118,7 @@ export interface BillCreate {
   is_recurring?: boolean;
   recurrence_interval_days?: number | null;
   recurrence_occurrences?: number | null;
+  recurrence_day_of_month?: number | null;
 }
 
 export interface BillUpdate {
@@ -122,6 +127,23 @@ export interface BillUpdate {
   due_date?: string;
   status?: BillStatus;
   notes?: string | null;
+  payment_bank?: string | null;
+  paid_at?: string | null;
+}
+
+export interface MarkPaidPayload {
+  payment_bank?: string | null;
+  paid_at?: string | null;
+}
+
+// Bill Attachment types
+export interface BillAttachment {
+  id: number;
+  bill_id: number;
+  filename: string;
+  mime_type: string | null;
+  file_size: number | null;
+  created_at: string;
 }
 
 // API Response types

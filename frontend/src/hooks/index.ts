@@ -6,3 +6,4 @@ export * from './useBranches';
 export * from './useVendors';
 export * from './useCategories';
 export * from './useBills';
+export * from './useBillAttachments';

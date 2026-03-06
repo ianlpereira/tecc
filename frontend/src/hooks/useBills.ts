@@ -1,11 +1,6 @@
-/**
- * Custom hooks for Bill operations
- */
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { billApi } from '../services/api';
-import type { BillCreate, BillUpdate } from '../types';
-import { BillStatus } from '../types';
+import type { BillCreate, BillUpdate, MarkPaidPayload } from '../types';
 
 const QUERY_KEY = ['bills'];
 
@@ -62,7 +57,8 @@ export function useMarkBillAsPaid() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => billApi.update(id, { status: BillStatus.PAID }),
+    mutationFn: ({ id, payload }: { id: number; payload?: MarkPaidPayload }) =>
+      billApi.markAsPaid(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },

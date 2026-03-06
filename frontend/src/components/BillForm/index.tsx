@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, message, Checkbox, Row, Col, Alert } from 'antd';
+import { Form, Input, InputNumber, Select, DatePicker, Button, message, Checkbox, Row, Col, Alert, Radio, Divider } from 'antd';
+import { PaperClipOutlined } from '@ant-design/icons';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +9,7 @@ import { useCreateBill, useUpdateBill, useBranches, useVendors, useCategories } 
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
+import { BillAttachments } from '../BillAttachments';
 
 const billSchema = z.object({
   branch_id: z.number().min(1, 'Filial é obrigatória'),
@@ -20,8 +22,10 @@ const billSchema = z.object({
   notes: z.string().optional().nullable().or(z.literal('')),
   status: z.nativeEnum(BillStatus).optional(),
   is_recurring: z.boolean().optional().default(false),
+  recurrence_type: z.enum(['interval', 'fixed_day']).optional().default('interval'),
   recurrence_interval_days: z.number().min(1).nullable().optional(),
   recurrence_occurrences: z.number().min(2).max(60).nullable().optional(),
+  recurrence_day_of_month: z.number().min(1).max(28).nullable().optional(),
 });
 
 type BillFormData = z.infer<typeof billSchema>;
@@ -64,14 +68,18 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
       notes: initialValues?.notes || '',
       status: BillStatus.PENDING,
       is_recurring: false,
+      recurrence_type: 'interval' as const,
       recurrence_interval_days: null,
       recurrence_occurrences: null,
+      recurrence_day_of_month: null,
     },
   });
 
   const isRecurring = watch('is_recurring');
+  const recurrenceType = watch('recurrence_type');
   const intervalDays = watch('recurrence_interval_days');
   const occurrences = watch('recurrence_occurrences');
+  const dayOfMonth = watch('recurrence_day_of_month');
 
   useEffect(() => {
     if (bill) {
@@ -92,13 +100,15 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
   }, [bill, currentBranch, reset, setValue]);
 
   const onSubmit = (data: BillFormData) => {
+    const useFixedDay = data.is_recurring && data.recurrence_type === 'fixed_day';
     const payload = {
       ...data,
       invoice_number: data.invoice_number || null,
       notes: data.notes || null,
       is_recurring: data.is_recurring || false,
-      recurrence_interval_days: data.is_recurring ? data.recurrence_interval_days : null,
+      recurrence_interval_days: (!useFixedDay && data.is_recurring) ? data.recurrence_interval_days : null,
       recurrence_occurrences: data.is_recurring ? data.recurrence_occurrences : null,
+      recurrence_day_of_month: (useFixedDay) ? data.recurrence_day_of_month : null,
     };
 
     if (isEditing && bill) {
@@ -325,29 +335,68 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
 
           {isRecurring && (
             <div style={{ background: '#f6f8fa', padding: 16, borderRadius: 8, marginBottom: 16, border: '1px solid #d9d9d9' }}>
+              {/* F3: type selector */}
+              <Form.Item label="Tipo de Recorrência">
+                <Controller
+                  name="recurrence_type"
+                  control={control}
+                  render={({ field }) => (
+                    <Radio.Group {...field}>
+                      <Radio value="interval">Intervalo em dias</Radio>
+                      <Radio value="fixed_day">Dia fixo do mês</Radio>
+                    </Radio.Group>
+                  )}
+                />
+              </Form.Item>
+
               <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label="Intervalo (dias)"
-                    validateStatus={errors.recurrence_interval_days ? 'error' : ''}
-                    help={errors.recurrence_interval_days?.message}
-                  >
-                    <Controller
-                      name="recurrence_interval_days"
-                      control={control}
-                      render={({ field }) => (
-                        <InputNumber
-                          {...field}
-                          min={1}
-                          max={365}
-                          placeholder="Ex: 30"
-                          style={{ width: '100%' }}
-                          value={field.value ?? undefined}
-                        />
-                      )}
-                    />
-                  </Form.Item>
-                </Col>
+                {recurrenceType === 'interval' ? (
+                  <Col span={12}>
+                    <Form.Item
+                      label="Intervalo (dias)"
+                      validateStatus={errors.recurrence_interval_days ? 'error' : ''}
+                      help={errors.recurrence_interval_days?.message}
+                    >
+                      <Controller
+                        name="recurrence_interval_days"
+                        control={control}
+                        render={({ field }) => (
+                          <InputNumber
+                            {...field}
+                            min={1}
+                            max={365}
+                            placeholder="Ex: 30"
+                            style={{ width: '100%' }}
+                            value={field.value ?? undefined}
+                          />
+                        )}
+                      />
+                    </Form.Item>
+                  </Col>
+                ) : (
+                  <Col span={12}>
+                    <Form.Item
+                      label="Dia do mês (1–28)"
+                      validateStatus={errors.recurrence_day_of_month ? 'error' : ''}
+                      help={errors.recurrence_day_of_month?.message}
+                    >
+                      <Controller
+                        name="recurrence_day_of_month"
+                        control={control}
+                        render={({ field }) => (
+                          <InputNumber
+                            {...field}
+                            min={1}
+                            max={28}
+                            placeholder="Ex: 10"
+                            style={{ width: '100%' }}
+                            value={field.value ?? undefined}
+                          />
+                        )}
+                      />
+                    </Form.Item>
+                  </Col>
+                )}
                 <Col span={12}>
                   <Form.Item
                     label="Número de Ocorrências"
@@ -375,13 +424,26 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
                 type="info"
                 showIcon
                 message={
-                  occurrences && intervalDays
+                  recurrenceType === 'fixed_day'
+                    ? occurrences && dayOfMonth
+                      ? `Serão criadas ${occurrences} contas, todo dia ${dayOfMonth} de cada mês`
+                      : 'Preencha o dia do mês e o número de ocorrências'
+                    : occurrences && intervalDays
                     ? `Serão criadas ${occurrences} contas, a cada ${intervalDays} dia(s) a partir da data de vencimento`
                     : 'Preencha o intervalo e o número de ocorrências'
                 }
               />
             </div>
           )}
+        </>
+      )}
+
+      {isEditing && bill?.id && (
+        <>
+          <Divider orientation="left">
+            <PaperClipOutlined /> Anexos
+          </Divider>
+          <BillAttachments billId={bill.id} />
         </>
       )}
 

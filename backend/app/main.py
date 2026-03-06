@@ -6,7 +6,7 @@ Sistema Financeiro Centralizado de Contas a Pagar
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routers import health, branches, vendors, categories, bills
+from app.routers import health, branches, vendors, categories, bills, bill_attachments
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -32,6 +32,7 @@ app.include_router(branches.router)
 app.include_router(vendors.router)
 app.include_router(categories.router)
 app.include_router(bills.router)
+app.include_router(bill_attachments.router)
 
 # Root endpoint
 @app.get("/")

@@ -8,6 +8,7 @@ from app.models.branch import Branch
 from app.models.vendor import Vendor
 from app.models.category import Category
 from app.models.bill import Bill, BillStatus
+from app.models.bill_attachment import BillAttachment
 
 __all__ = [
     "Base",
@@ -17,5 +18,6 @@ __all__ = [
     "Category",
     "Bill",
     "BillStatus",
+    "BillAttachment",
 ]
 

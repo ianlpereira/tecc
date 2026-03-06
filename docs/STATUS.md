@@ -1,6 +1,45 @@
-# 📊 Status Projeto - Épicos 1, 2, 3, 4, 5 e Feature Recorrência
+# 📊 Status Projeto - Épicos 1, 2, 3, 4, 5, 6 e Feature Recorrência
 
-> **Última Atualização:** 27 de Fevereiro de 2026
+> **Última Atualização:** 01 de Março de 2026
+
+---
+
+## ✅ ÉPICO 6 - Funcionalidades Avançadas (COMPLETO)
+
+> **Documentação completa:** `docs/EPIC-6-PLANNING.md`  
+> **Concluído em:** 01/03/2026
+
+### Backend
+
+- [x] **F1** — Model `BillAttachment` (tabela `bill_attachments`: id, bill_id, filename, mime_type, file_size, file_data base64)
+- [x] **F1** — Schema `BillAttachmentResponse` + `BillAttachmentWithData`
+- [x] **F1** — Repository `BillAttachmentRepository`: get_by_bill, count_by_bill
+- [x] **F1** — Service `BillAttachmentService`: upload (valida MIME, 5MB, max 3), download, delete
+- [x] **F1** — Router `bill_attachments.py`: GET/POST/DELETE/download endpoints
+- [x] **F2** — Model `Bill`: novos campos `payment_bank` (String) + `paid_at` (Date)
+- [x] **F2** — Router `mark-paid`: aceita corpo `{payment_bank, paid_at}` via `MarkPaidRequest`
+- [x] **F3** — Model `Bill`: novo campo `recurrence_day_of_month` (Integer, 1–28)
+- [x] **F3** — Service `create_bill()`: modo dia-fixo usa `relativedelta` para gerar datas corretas
+- [x] Migration Alembic `c3d4e5f6a7b8_epic6_fields.py` (4 mudanças: 3 colunas + 1 tabela)
+- [x] `requirements.txt`: + `python-dateutil==2.9.0`
+
+### Frontend
+
+- [x] **F1** — `types/index.ts`: `BillAttachment`, `attachments_count` em `Bill`
+- [x] **F1** — `api.ts`: `billAttachmentApi` (list, upload multipart, download blob, delete)
+- [x] **F1** — `hooks/useBillAttachments.ts`: `useBillAttachments`, `useUploadAttachment`, `useDeleteAttachment`
+- [x] **F1** — `BillAttachments` component: dragger upload, lista com download/excluir, contador
+- [x] **F1** — `BillForm`: seção "Anexos" (com `<BillAttachments>`) visível ao editar
+- [x] **F1** — `Bills/index.tsx`: badge 📎 com contagem na coluna Descrição
+- [x] **F2** — `types/index.ts`: `MarkPaidPayload`, `payment_bank` + `paid_at` em `Bill`
+- [x] **F2** — `useBills.ts`: `useMarkBillAsPaid` envia `{id, payload}` para `/mark-paid`
+- [x] **F2** — `api.ts`: `billApi.markAsPaid(id, payload)` POST para `/bills/{id}/mark-paid`
+- [x] **F2** — `Dashboard/index.tsx`: botão "Pago" abre modal com seletor de banco + datepicker
+- [x] **F3** — `types/index.ts`: `recurrence_day_of_month` em `Bill` e `BillCreate`
+- [x] **F3** — `BillForm`: Radio "Intervalo em dias" | "Dia fixo do mês" + preview dinâmico do Alert
+- [x] **F4** — `Bills/index.tsx`: 4 filtros (Status, Categoria, Fornecedor, Filial) + "Limpar Filtros" + contador
+
+**Status: ✅ CONCLUÍDO — Executar migration: `docker compose exec backend alembic upgrade head`**
 
 ---
 
