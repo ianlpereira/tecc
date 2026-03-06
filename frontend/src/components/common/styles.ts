@@ -84,6 +84,8 @@ export const StatusTag = styled.span<{ $status: string }>`
     switch (props.$status) {
       case 'pending':
         return '#fff7e6';
+      case 'overdue':
+        return '#fff1f0';
       case 'approved':
         return '#e6f7ff';
       case 'paid':
@@ -98,6 +100,8 @@ export const StatusTag = styled.span<{ $status: string }>`
     switch (props.$status) {
       case 'pending':
         return '#d48806';
+      case 'overdue':
+        return '#cf1322';
       case 'approved':
         return '#0958d9';
       case 'paid':

@@ -31,6 +31,23 @@ const statusLabels: Record<BillStatus, string> = {
   [BillStatus.CANCELLED]: 'Cancelada',
 };
 
+const parseLocalDate = (dateStr: string): Date => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const isOverdue = (bill: Bill): boolean => {
+  if (bill.status !== BillStatus.PENDING) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return parseLocalDate(bill.due_date) < today;
+};
+
+const getBillStatusDisplay = (bill: Bill): { label: string; tag: string } => {
+  if (isOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
+  return { label: statusLabels[bill.status], tag: bill.status };
+};
+
 export function DashboardPage(): React.ReactElement {
   const navigate = useNavigate();
   const { currentBranch, includeChildren } = useBranchStore();
@@ -63,12 +80,6 @@ export function DashboardPage(): React.ReactElement {
   const filteredBills = useMemo(() => {
     return bills.filter((bill: Bill) => bill.status !== BillStatus.CANCELLED);
   }, [bills]);
-
-  // Normaliza uma string YYYY-MM-DD para início do dia local (sem offset de timezone)
-  const parseLocalDate = (dateStr: string): Date => {
-    const [year, month, day] = dateStr.split('-').map(Number);
-    return new Date(year, month - 1, day);
-  };
 
   const stats = useMemo(() => {
     const today = new Date();
@@ -182,11 +193,10 @@ export function DashboardPage(): React.ReactElement {
       dataIndex: 'status',
       key: 'status',
       width: 110,
-      render: (status: BillStatus) => (
-        <S.StatusTag $status={status}>
-          {statusLabels[status]}
-        </S.StatusTag>
-      ),
+      render: (_: BillStatus, record: Bill) => {
+        const { label, tag } = getBillStatusDisplay(record);
+        return <S.StatusTag $status={tag}>{label}</S.StatusTag>;
+      },
     },
     {
       title: 'Ação',

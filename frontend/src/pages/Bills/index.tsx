@@ -1,21 +1,44 @@
-import React, { useMemo } from 'react';
-import { Table, Button, Modal, Select, Popconfirm, message, Tooltip, Badge, Space } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined, PaperClipOutlined, FilterOutlined } from '@ant-design/icons';
+import React, { useMemo, useState } from 'react';
+import { Table, Button, Modal, Select, Popconfirm, message, Tooltip, Badge, Space, Form, DatePicker } from 'antd';
+import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined, PaperClipOutlined, FilterOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
 import { BillForm } from '../../components/BillForm';
-import { useBills, useDeleteBill, useBranches, useVendors, useCategories } from '../../hooks';
+import { useBills, useDeleteBill, useBranches, useVendors, useCategories, useMarkBillAsPaid } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
 import * as S from '../../components/common/styles';
+
+const BANKS = [
+  'Bradesco', 'Itaú', 'Santander', 'Caixa', 'Banco do Brasil',
+  'Nubank', 'Inter', 'C6', 'Sicredi', 'Sicoob', 'Outro',
+];
 
 const statusLabels: Record<BillStatus, string> = {
   [BillStatus.PENDING]: 'Pendente',
   [BillStatus.APPROVED]: 'Aprovada',
   [BillStatus.PAID]: 'Paga',
   [BillStatus.CANCELLED]: 'Cancelada',
+};
+
+const parseLocalDate = (dateStr: string): Date => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const isOverdue = (bill: Bill): boolean => {
+  if (bill.status !== BillStatus.PENDING) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return parseLocalDate(bill.due_date) < today;
+};
+
+const getBillStatusDisplay = (bill: Bill): { label: string; tag: string } => {
+  if (isOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
+  return { label: statusLabels[bill.status], tag: bill.status };
 };
 
 export function BillsPage(): React.ReactElement {
@@ -28,6 +51,7 @@ export function BillsPage(): React.ReactElement {
   const { data: vendors = [] } = useVendors();
   const { data: categories = [] } = useCategories();
   const { mutate: deleteBill } = useDeleteBill();
+  const { mutate: markAsPaid } = useMarkBillAsPaid();
   
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingBill, setEditingBill] = React.useState<Bill | null>(null);
@@ -36,6 +60,11 @@ export function BillsPage(): React.ReactElement {
   const [categoryFilter, setCategoryFilter] = React.useState<number | 'all'>('all');
   const [vendorFilter, setVendorFilter] = React.useState<number | 'all'>('all');
   const [branchFilter, setBranchFilter] = React.useState<number | 'all'>('all');
+
+  // Pay modal state
+  const [payModalBill, setPayModalBill] = useState<Bill | null>(null);
+  const [payBank, setPayBank] = useState<string | undefined>(undefined);
+  const [payDate, setPayDate] = useState<dayjs.Dayjs>(dayjs());
 
   const branchMap = useMemo(() => {
     return new Map(branches?.map(b => [b.id, b.name]));
@@ -53,7 +82,11 @@ export function BillsPage(): React.ReactElement {
     let result = bills || [];
 
     if (statusFilter !== 'all') {
-      result = result.filter((bill: Bill) => bill.status === statusFilter);
+      if (statusFilter === 'overdue' as any) {
+        result = result.filter((bill: Bill) => isOverdue(bill));
+      } else {
+        result = result.filter((bill: Bill) => bill.status === statusFilter && !isOverdue(bill));
+      }
     }
     if (categoryFilter !== 'all') {
       result = result.filter((bill: Bill) => bill.category_id === categoryFilter);
@@ -111,6 +144,34 @@ export function BillsPage(): React.ReactElement {
     setIsModalOpen(false);
     setEditingBill(null);
     setDuplicatingBill(null);
+  };
+
+  const handleOpenPayModal = (bill: Bill) => {
+    setPayModalBill(bill);
+    setPayBank(undefined);
+    setPayDate(dayjs());
+  };
+
+  const handleConfirmPayment = () => {
+    if (!payModalBill) return;
+    markAsPaid(
+      {
+        id: payModalBill.id,
+        payload: {
+          payment_bank: payBank || null,
+          paid_at: payDate ? payDate.format('YYYY-MM-DD') : null,
+        },
+      },
+      {
+        onSuccess: () => {
+          message.success(`Pagamento de "${payModalBill.description}" registrado!`);
+          setPayModalBill(null);
+        },
+        onError: () => {
+          message.error('Erro ao registrar pagamento');
+        },
+      }
+    );
   };
 
   const formatCurrency = (value: number) => {
@@ -191,40 +252,53 @@ export function BillsPage(): React.ReactElement {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: BillStatus) => (
-        <S.StatusTag $status={status}>
-          {statusLabels[status]}
-        </S.StatusTag>
-      ),
+      render: (_: BillStatus, record: Bill) => {
+        const { label, tag } = getBillStatusDisplay(record);
+        return <S.StatusTag $status={tag}>{label}</S.StatusTag>;
+      },
     },
     {
       title: 'Ações',
       key: 'actions',
-      width: 120,
-      render: (_: unknown, record: Bill) => (
-        <S.TableActions>
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Button
-            type="text"
-            icon={<CopyOutlined />}
-            onClick={() => handleDuplicate(record)}
-            title="Duplicar"
-          />
-          <Popconfirm
-            title="Excluir conta"
-            description="Tem certeza que deseja excluir esta conta?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Sim"
-            cancelText="Não"
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </S.TableActions>
-      ),
+      width: 160,
+      render: (_: unknown, record: Bill) => {
+        const canPay = record.status === BillStatus.PENDING || record.status === BillStatus.APPROVED;
+        return (
+          <S.TableActions>
+            {canPay && (
+              <Tooltip title="Marcar como Pago">
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleOpenPayModal(record)}
+                  style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                />
+              </Tooltip>
+            )}
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            />
+            <Button
+              type="text"
+              icon={<CopyOutlined />}
+              onClick={() => handleDuplicate(record)}
+              title="Duplicar"
+            />
+            <Popconfirm
+              title="Excluir conta"
+              description="Tem certeza que deseja excluir esta conta?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Sim"
+              cancelText="Não"
+            >
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </S.TableActions>
+        );
+      },
     },
   ];
 
@@ -245,6 +319,7 @@ export function BillsPage(): React.ReactElement {
           options={[
             { value: 'all', label: 'Todos os Status' },
             { value: BillStatus.PENDING, label: 'Pendente' },
+            { value: 'overdue', label: 'Vencida' },
             { value: BillStatus.APPROVED, label: 'Aprovada' },
             { value: BillStatus.PAID, label: 'Paga' },
             { value: BillStatus.CANCELLED, label: 'Cancelada' },
@@ -321,6 +396,43 @@ export function BillsPage(): React.ReactElement {
           onSuccess={handleModalClose}
           onCancel={handleModalClose}
         />
+      </Modal>
+
+      {/* Pay modal */}
+      <Modal
+        title={`Registrar Pagamento — ${payModalBill?.description ?? ''}`}
+        open={!!payModalBill}
+        onOk={handleConfirmPayment}
+        onCancel={() => setPayModalBill(null)}
+        okText="Confirmar Pagamento"
+        cancelText="Cancelar"
+        width={420}
+      >
+        <Form layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item label="Banco / Forma de Pagamento">
+            <Select
+              placeholder="Selecione o banco (opcional)"
+              allowClear
+              value={payBank}
+              onChange={(v) => setPayBank(v)}
+              options={BANKS.map((b) => ({ value: b, label: b }))}
+            />
+          </Form.Item>
+          <Form.Item label="Data do Pagamento">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY"
+              value={payDate}
+              onChange={(d) => d && setPayDate(d)}
+              allowClear={false}
+            />
+          </Form.Item>
+          {payModalBill && (
+            <p style={{ color: '#666', fontSize: 13 }}>
+              Valor: <strong>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payModalBill.amount)}</strong>
+            </p>
+          )}
+        </Form>
       </Modal>
     </Layout>
   );
