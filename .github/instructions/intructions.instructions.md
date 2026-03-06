@@ -45,3 +45,9 @@
 ## 5. Docker & Environment
 - The application must run via `docker-compose up`.
 - Ensure hot-reload is active for both Frontend (Vite) and Backend (FastAPI reload) in the development environment.
+
+## 6. Documentation
+- All new features must be documented in the `docs/` folder with clear instructions and code snippets.
+- Update `README.md` with any new setup instructions or architectural changes.
+- All features and epics must have a corresponding summary and planning document in `docs/`.
+- The status of the project must be updated in `STATUS.md` after each significant change or completion of an epic.
