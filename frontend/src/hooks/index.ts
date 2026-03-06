@@ -8,3 +8,4 @@ export * from './useCategories';
 export * from './useBills';
 export * from './useBillAttachments';
 export * from './useVehicles';
+export * from './useFipe';

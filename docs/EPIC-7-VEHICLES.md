@@ -184,6 +184,26 @@ useDeleteVehicle()        // mutação com invalidação
 useCreateVehicleBill()    // invalida vehicles + vehicle bills + bills
 ```
 
+#### 3b. Hook FIPE (`frontend/src/hooks/useFipe.ts`)
+
+Integração com a **Brasil API** para buscar marcas e modelos da tabela FIPE — sem autenticação, CORS habilitado, cache de 24h.
+
+```typescript
+// Retorna marcas ordenadas alfabeticamente para o tipo de veículo
+useVehicleBrands(type: 'carros' | 'motos' | 'caminhoes')
+// → { nome: string, valor: string }[]  (valor = código da marca na FIPE)
+
+// Retorna modelos ordenados para marca + tipo. Desabilitado se brandCode for null.
+useVehicleModels(type, brandCode: string | null)
+// → { modelo: string }[]
+```
+
+**Endpoints da Brasil API utilizados:**
+```
+GET https://brasilapi.com.br/fipe/marcas/v1/{tipoVeiculo}
+GET https://brasilapi.com.br/fipe/veiculos/v1/{tipoVeiculo}/{codigoMarca}
+```
+
 #### 4. Página (`frontend/src/pages/Vehicles/index.tsx`)
 
 **Componente `VehiclesPage`:**
@@ -191,9 +211,13 @@ useCreateVehicleBill()    // invalida vehicles + vehicle bills + bills
 - Ações por linha: 👁 Ver Contas · ✏️ Editar · 🗑️ Excluir
 - Botão "Novo Veículo" abre modal de formulário
 
-**Modal de Formulário (criar/editar):**
-- Campos: Placa, Marca, Modelo, Ano, Filial (Select), Observações
-- Validações Ant Design Form integradas
+**Modal de Formulário (criar/editar) — Selects FIPE em cascata:**
+1. **Tipo de Veículo** — `carros` / `motos` / `caminhões`
+2. **Marca** — Select com busca (`showSearch`), alimentado pela FIPE; ao trocar tipo reseta marca e modelo
+3. **Modelo** — Select com busca, alimentado pela FIPE a partir da marca selecionada; desabilitado até marca ser escolhida
+4. **Placa**, **Ano**, **Filial** (Select), **Observações**
+
+> Ao editar um veículo existente, o formulário pré-carrega os valores salvos em Marca e Modelo como texto — o usuário pode redigitar ou selecionar da FIPE normalmente.
 
 **Modal de Detalhe (Ver Contas):**
 - Tab **Contas** (`VehicleBillsTab`):
@@ -241,6 +265,7 @@ Campo **Veículo** adicionado ao formulário padrão de contas:
 | `backend/app/routers/vehicles.py` | Router FastAPI |
 | `backend/alembic/versions/0f1f3b804c93_*.py` | Migração Alembic |
 | `frontend/src/hooks/useVehicles.ts` | Hooks TanStack Query |
+| `frontend/src/hooks/useFipe.ts` | Hooks Brasil API FIPE (marcas/modelos) |
 | `frontend/src/pages/Vehicles/index.tsx` | Página completa |
 
 ### Arquivos modificados

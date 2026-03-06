@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Table, Button, Modal, Form, Input, InputNumber, Select,
-  Popconfirm, message, Tooltip, Tag, Tabs, Divider,
+  Popconfirm, message, Tooltip, Tag, Tabs, Divider, Spin,
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined,
@@ -15,9 +15,19 @@ import {
   useVehicles, useCreateVehicle, useUpdateVehicle, useDeleteVehicle,
   useBranches, useVehicleBills,
 } from '../../hooks';
+import {
+  useVehicleBrands, useVehicleModels,
+} from '../../hooks/useFipe';
+import type { FipeVehicleType } from '../../hooks/useFipe';
 import { BillStatus } from '../../types';
 import type { Vehicle, Bill } from '../../types';
 import * as S from '../../components/common/styles';
+
+const VEHICLE_TYPE_OPTIONS: { value: FipeVehicleType; label: string }[] = [
+  { value: 'carros', label: 'Carro' },
+  { value: 'motos', label: 'Moto' },
+  { value: 'caminhoes', label: 'Caminhão' },
+];
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -149,6 +159,13 @@ export function VehiclesPage(): React.ReactElement {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [detailVehicle, setDetailVehicle] = useState<Vehicle | null>(null);
 
+  // FIPE cascade state
+  const [vehicleType, setVehicleType] = useState<FipeVehicleType>('carros');
+  const [selectedBrandCode, setSelectedBrandCode] = useState<string | null>(null);
+
+  const { data: fipeBrands = [], isFetching: loadingBrands } = useVehicleBrands(vehicleType);
+  const { data: fipeModels = [], isFetching: loadingModels } = useVehicleModels(vehicleType, selectedBrandCode);
+
   const [form] = Form.useForm<VehicleFormValues>();
 
   const branchMap = useMemo(
@@ -159,11 +176,17 @@ export function VehiclesPage(): React.ReactElement {
   const handleOpenCreate = () => {
     setEditingVehicle(null);
     form.resetFields();
+    setVehicleType('carros');
+    setSelectedBrandCode(null);
     setIsFormModalOpen(true);
   };
 
   const handleOpenEdit = (vehicle: Vehicle) => {
     setEditingVehicle(vehicle);
+    // Reset FIPE cascade — will be typed manually when editing since we don't
+    // know the FIPE brand code from a free-text brand stored in the DB.
+    setVehicleType('carros');
+    setSelectedBrandCode(null);
     form.setFieldsValue({
       plate: vehicle.plate,
       brand: vehicle.brand,
@@ -292,12 +315,56 @@ export function VehiclesPage(): React.ReactElement {
           <Form.Item label="Placa" name="plate" rules={[{ required: true, message: 'Informe a placa' }]}>
             <Input placeholder="ABC-1234" style={{ textTransform: 'uppercase' }} />
           </Form.Item>
+
+          {/* FIPE cascade: Type → Brand → Model */}
+          <Form.Item label="Tipo de Veículo">
+            <Select
+              value={vehicleType}
+              options={VEHICLE_TYPE_OPTIONS}
+              onChange={(val: FipeVehicleType) => {
+                setVehicleType(val);
+                setSelectedBrandCode(null);
+                form.setFieldsValue({ brand: undefined, model: undefined });
+              }}
+            />
+          </Form.Item>
+
           <Form.Item label="Marca" name="brand" rules={[{ required: true, message: 'Informe a marca' }]}>
-            <Input placeholder="Ex: Ford" />
+            <Select
+              showSearch
+              allowClear
+              placeholder={loadingBrands ? 'Carregando marcas...' : 'Selecione ou digite a marca'}
+              loading={loadingBrands}
+              optionFilterProp="label"
+              options={fipeBrands.map(b => ({ value: b.nome, label: b.nome, code: b.valor }))}
+              onChange={(_value: string, option: any) => {
+                const code = Array.isArray(option) ? option[0]?.code : option?.code;
+                setSelectedBrandCode(code ?? null);
+                form.setFieldsValue({ model: undefined });
+              }}
+              notFoundContent={loadingBrands ? <Spin size="small" /> : 'Nenhuma marca encontrada'}
+            />
           </Form.Item>
+
           <Form.Item label="Modelo" name="model" rules={[{ required: true, message: 'Informe o modelo' }]}>
-            <Input placeholder="Ex: Ranger" />
+            <Select
+              showSearch
+              allowClear
+              placeholder={
+                !selectedBrandCode
+                  ? 'Selecione uma marca primeiro'
+                  : loadingModels
+                  ? 'Carregando modelos...'
+                  : 'Selecione ou digite o modelo'
+              }
+              loading={loadingModels}
+              disabled={!selectedBrandCode && !editingVehicle}
+              optionFilterProp="label"
+              options={fipeModels.map(m => ({ value: m.modelo, label: m.modelo }))}
+              notFoundContent={loadingModels ? <Spin size="small" /> : 'Nenhum modelo encontrado'}
+            />
           </Form.Item>
+
           <Form.Item label="Ano" name="year">
             <InputNumber style={{ width: '100%' }} min={1950} max={2030} placeholder="Ex: 2022" />
           </Form.Item>
