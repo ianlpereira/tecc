@@ -27,6 +27,7 @@ class BillCreate(BillBase):
     recurrence_interval_days: int | None = None
     recurrence_occurrences: int | None = None
     recurrence_day_of_month: int | None = None
+    vehicle_id: int | None = None
 
 
 class BillUpdate(BaseSchema):
@@ -39,6 +40,7 @@ class BillUpdate(BaseSchema):
     notes: str | None = None
     payment_bank: str | None = None
     paid_at: date | None = None
+    vehicle_id: int | None = None
 
 
 class BillResponse(TimestampedSchema):
@@ -62,3 +64,4 @@ class BillResponse(TimestampedSchema):
     recurrence_day_of_month: int | None = None
     payment_bank: str | None = None
     paid_at: date | None = None
+    vehicle_id: int | None = None

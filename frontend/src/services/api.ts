@@ -19,6 +19,9 @@ import type {
   BillUpdate,
   MarkPaidPayload,
   BillAttachment,
+  Vehicle,
+  VehicleCreate,
+  VehicleUpdate,
 } from '../types';
 
 const API_PREFIX = '/api/v1';
@@ -196,5 +199,43 @@ export const billAttachmentApi = {
 
   delete: async (billId: number, attachmentId: number): Promise<void> => {
     await apiClient.delete(`${API_PREFIX}/bills/${billId}/attachments/${attachmentId}`);
+  },
+};
+
+// ============ VEHICLES ============
+
+export const vehicleApi = {
+  getAll: async (): Promise<Vehicle[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/vehicles`);
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<Vehicle> => {
+    const response = await apiClient.get(`${API_PREFIX}/vehicles/${id}`);
+    return response.data;
+  },
+
+  create: async (data: VehicleCreate): Promise<Vehicle> => {
+    const response = await apiClient.post(`${API_PREFIX}/vehicles`, data);
+    return response.data;
+  },
+
+  update: async (id: number, data: VehicleUpdate): Promise<Vehicle> => {
+    const response = await apiClient.put(`${API_PREFIX}/vehicles/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await apiClient.delete(`${API_PREFIX}/vehicles/${id}`);
+  },
+
+  getBills: async (id: number): Promise<Bill[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/vehicles/${id}/bills`);
+    return response.data;
+  },
+
+  createBill: async (vehicleId: number, data: BillCreate): Promise<Bill> => {
+    const response = await apiClient.post(`${API_PREFIX}/vehicles/${vehicleId}/bills`, data);
+    return response.data;
   },
 };

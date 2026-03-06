@@ -13,6 +13,7 @@ import {
   VendorsPage,
   CategoriesPage,
   BillsPage,
+  VehiclesPage,
   NotFoundPage,
 } from './pages'
 
@@ -32,6 +33,7 @@ function App(): React.ReactElement {
               <Route path="/branches" element={<BranchesPage />} />
               <Route path="/vendors" element={<VendorsPage />} />
               <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/vehicles" element={<VehiclesPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Router>

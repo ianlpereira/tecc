@@ -104,6 +104,7 @@ export interface Bill {
   payment_bank?: string | null;
   paid_at?: string | null;
   attachments_count?: number;
+  vehicle_id?: number | null;
 }
 
 export interface BillCreate {
@@ -119,6 +120,7 @@ export interface BillCreate {
   recurrence_interval_days?: number | null;
   recurrence_occurrences?: number | null;
   recurrence_day_of_month?: number | null;
+  vehicle_id?: number | null;
 }
 
 export interface BillUpdate {
@@ -149,4 +151,35 @@ export interface BillAttachment {
 // API Response types
 export interface ApiError {
   detail: string;
+}
+
+// Vehicle types
+export interface Vehicle {
+  id: number;
+  plate: string;
+  brand: string;
+  model: string;
+  year: number | null;
+  branch_id: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleCreate {
+  plate: string;
+  brand: string;
+  model: string;
+  year?: number | null;
+  branch_id: number;
+  notes?: string | null;
+}
+
+export interface VehicleUpdate {
+  plate?: string;
+  brand?: string;
+  model?: string;
+  year?: number | null;
+  branch_id?: number;
+  notes?: string | null;
 }

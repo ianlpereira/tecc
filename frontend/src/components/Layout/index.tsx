@@ -6,6 +6,7 @@ import {
   ShopOutlined,
   TagsOutlined,
   FileTextOutlined,
+  CarOutlined,
 } from '@ant-design/icons';
 import { BranchSelector } from '../BranchSelector';
 import * as S from './styles';
@@ -21,6 +22,7 @@ const menuItems = [
   { path: '/branches', label: 'Filiais', icon: <BankOutlined /> },
   { path: '/vendors', label: 'Fornecedores', icon: <ShopOutlined /> },
   { path: '/categories', label: 'Categorias', icon: <TagsOutlined /> },
+  { path: '/vehicles', label: 'Veículos', icon: <CarOutlined /> },
 ];
 
 export function Layout({ children, title = 'TECC' }: LayoutProps): React.ReactElement {

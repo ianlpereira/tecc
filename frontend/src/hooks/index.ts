@@ -7,3 +7,4 @@ export * from './useVendors';
 export * from './useCategories';
 export * from './useBills';
 export * from './useBillAttachments';
+export * from './useVehicles';

@@ -59,6 +59,10 @@ class BillService:
         """Get all pending bills."""
         return await self.repository.get_pending_bills()
 
+    async def get_bills_by_vehicle(self, vehicle_id: int) -> List[Bill]:
+        """Get all bills associated with a vehicle."""
+        return await self.repository.get_by_vehicle(vehicle_id)
+
     async def create_bill(
         self,
         branch_id: int,
@@ -73,6 +77,7 @@ class BillService:
         recurrence_interval_days: int = None,
         recurrence_occurrences: int = None,
         recurrence_day_of_month: int = None,
+        vehicle_id: int = None,
     ) -> Bill:
         """Create a new bill. If is_recurring=True, generates N bills.
         Supports two modes:
@@ -136,6 +141,7 @@ class BillService:
                     recurrence_day_of_month=recurrence_day_of_month,
                     recurrence_total=recurrence_occurrences,
                     recurrence_index=i + 1,
+                    vehicle_id=vehicle_id,
                 )
                 # Assign invoice_number only to the first occurrence
                 if i == 0 and invoice_number:
@@ -158,6 +164,7 @@ class BillService:
             invoice_number=invoice_number,
             notes=notes,
             status=BillStatus.PENDING,
+            vehicle_id=vehicle_id,
         )
         await self.repository.create(bill)
         await self.repository.commit()

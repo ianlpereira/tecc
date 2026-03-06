@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dayjs from 'dayjs';
-import { useCreateBill, useUpdateBill, useBranches, useVendors, useCategories } from '../../hooks';
+import { useCreateBill, useUpdateBill, useBranches, useVendors, useCategories, useVehicles } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
@@ -26,6 +26,7 @@ const billSchema = z.object({
   recurrence_interval_days: z.number().min(1).nullable().optional(),
   recurrence_occurrences: z.number().min(2).max(60).nullable().optional(),
   recurrence_day_of_month: z.number().min(1).max(28).nullable().optional(),
+  vehicle_id: z.number().nullable().optional(),
 });
 
 type BillFormData = z.infer<typeof billSchema>;
@@ -43,6 +44,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
   const { data: branches } = useBranches();
   const { data: vendors } = useVendors();
   const { data: categories } = useCategories();
+  const { data: vehicles } = useVehicles();
   const { currentBranch } = useBranchStore();
   
   const isLoading = isCreating || isUpdating;
@@ -109,6 +111,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
       recurrence_interval_days: (!useFixedDay && data.is_recurring) ? data.recurrence_interval_days : null,
       recurrence_occurrences: data.is_recurring ? data.recurrence_occurrences : null,
       recurrence_day_of_month: (useFixedDay) ? data.recurrence_day_of_month : null,
+      vehicle_id: data.vehicle_id || null,
     };
 
     if (isEditing && bill) {
@@ -312,6 +315,29 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
           control={control}
           render={({ field }) => (
             <Input.TextArea {...field} value={field.value || ''} placeholder="Observações adicionais" rows={3} />
+          )}
+        />
+      </Form.Item>
+
+      <Form.Item label="Veículo (opcional)">
+        <Controller
+          name="vehicle_id"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              allowClear
+              placeholder="Associar a um veículo"
+              showSearch
+              optionFilterProp="label"
+              options={[
+                { value: null, label: 'Nenhum' },
+                ...(vehicles?.map((v: any) => ({
+                  value: v.id,
+                  label: `${v.plate.toUpperCase()} — ${v.brand} ${v.model}`,
+                })) ?? []),
+              ]}
+            />
           )}
         />
       </Form.Item>

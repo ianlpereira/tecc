@@ -44,5 +44,8 @@ class Bill(BaseModel):
     payment_bank = Column(String(100), nullable=True)
     paid_at = Column(Date, nullable=True)
 
+    # Vehicle association
+    vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=True)
+
     def __repr__(self) -> str:
         return f"<Bill(id={self.id}, branch_id={self.branch_id}, vendor_id={self.vendor_id}, amount={self.amount})>"

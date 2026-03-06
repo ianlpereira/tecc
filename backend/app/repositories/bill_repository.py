@@ -62,3 +62,10 @@ class BillRepository(BaseRepository[Bill]):
             .order_by(Bill.recurrence_index)
         )
         return result.scalars().all()
+
+    async def get_by_vehicle(self, vehicle_id: int) -> List[Bill]:
+        """Get all bills associated with a vehicle."""
+        result = await self.db.execute(
+            select(Bill).where(Bill.vehicle_id == vehicle_id)
+        )
+        return result.scalars().all()

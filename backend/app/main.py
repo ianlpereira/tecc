@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.routers import health, branches, vendors, categories, bills, bill_attachments
+from app.routers.vehicles import router as vehicles_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -33,6 +34,7 @@ app.include_router(vendors.router)
 app.include_router(categories.router)
 app.include_router(bills.router)
 app.include_router(bill_attachments.router)
+app.include_router(vehicles_router)
 
 # Root endpoint
 @app.get("/")

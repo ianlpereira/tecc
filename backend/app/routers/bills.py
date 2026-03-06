@@ -92,6 +92,7 @@ async def create_bill(
             schema.recurrence_interval_days,
             schema.recurrence_occurrences,
             schema.recurrence_day_of_month,
+            schema.vehicle_id,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

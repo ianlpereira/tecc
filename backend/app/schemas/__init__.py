@@ -31,6 +31,12 @@ from app.schemas.bill_attachment import (
     BillAttachmentResponse,
     BillAttachmentWithData,
 )
+from app.schemas.vehicle import (
+    VehicleBase,
+    VehicleCreate,
+    VehicleUpdate,
+    VehicleResponse,
+)
 
 __all__ = [
     "BaseSchema",
@@ -53,4 +59,8 @@ __all__ = [
     "BillResponse",
     "BillAttachmentResponse",
     "BillAttachmentWithData",
+    "VehicleBase",
+    "VehicleCreate",
+    "VehicleUpdate",
+    "VehicleResponse",
 ]
