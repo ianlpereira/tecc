@@ -186,7 +186,8 @@ useCreateVehicleBill()    // invalida vehicles + vehicle bills + bills
 
 #### 3b. Hook FIPE (`frontend/src/hooks/useFipe.ts`)
 
-Integração com a **Brasil API** para buscar marcas e modelos da tabela FIPE — sem autenticação, CORS habilitado, cache de 24h.
+Integração com a tabela FIPE usando a API pública **Parallelum** (mais estável
+que os endpoints FIPE da BrasilAPI no momento). Sem autenticação. CORS habilitado.
 
 ```typescript
 // Retorna marcas ordenadas alfabeticamente para o tipo de veículo
@@ -198,10 +199,10 @@ useVehicleModels(type, brandCode: string | null)
 // → { modelo: string }[]
 ```
 
-**Endpoints da Brasil API utilizados:**
+**Endpoints (Parallelum FIPE):**
 ```
-GET https://brasilapi.com.br/fipe/marcas/v1/{tipoVeiculo}
-GET https://brasilapi.com.br/fipe/veiculos/v1/{tipoVeiculo}/{codigoMarca}
+GET https://parallelum.com.br/fipe/api/v1/{tipoVeiculo}/marcas
+GET https://parallelum.com.br/fipe/api/v1/{tipoVeiculo}/marcas/{codigoMarca}/modelos
 ```
 
 #### 4. Página (`frontend/src/pages/Vehicles/index.tsx`)
