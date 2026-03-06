@@ -258,6 +258,12 @@ export function BillsPage(): React.ReactElement {
       },
     },
     {
+      title: 'Banco',
+      dataIndex: 'payment_bank',
+      key: 'payment_bank',
+      render: (bank: string | null) => bank || <span style={{ color: '#bbb' }}>—</span>,
+    },
+    {
       title: 'Ações',
       key: 'actions',
       width: 160,
