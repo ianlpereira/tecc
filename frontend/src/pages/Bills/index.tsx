@@ -101,6 +101,14 @@ export function BillsPage(): React.ReactElement {
     return result;
   }, [bills, statusFilter, categoryFilter, vendorFilter, branchFilter]);
 
+  const totalSummary = useMemo(() => {
+    const total = filteredBills.reduce((sum: number, b: Bill) => sum + b.amount, 0);
+    const paid = filteredBills.filter((b: Bill) => b.status === BillStatus.PAID).reduce((sum: number, b: Bill) => sum + b.amount, 0);
+    const pending = filteredBills.filter((b: Bill) => b.status === BillStatus.PENDING && !isOverdue(b)).reduce((sum: number, b: Bill) => sum + b.amount, 0);
+    const overdue = filteredBills.filter((b: Bill) => isOverdue(b)).reduce((sum: number, b: Bill) => sum + b.amount, 0);
+    return { total, paid, pending, overdue };
+  }, [filteredBills]);
+
   const hasActiveFilters =
     statusFilter !== 'all' || categoryFilter !== 'all' || vendorFilter !== 'all' || branchFilter !== 'all';
 
@@ -376,6 +384,25 @@ export function BillsPage(): React.ReactElement {
           Exibindo {filteredBills.length} de {bills.length} contas
         </Space>
       </S.FilterBar>
+
+      <S.SummaryBar>
+        <S.SummaryItem>
+          <span>Total ({filteredBills.length} contas)</span>
+          <strong>{formatCurrency(totalSummary.total)}</strong>
+        </S.SummaryItem>
+        <S.SummaryItem $color="#52c41a">
+          <span>Pagas</span>
+          <strong>{formatCurrency(totalSummary.paid)}</strong>
+        </S.SummaryItem>
+        <S.SummaryItem $color="#1890ff">
+          <span>Pendentes</span>
+          <strong>{formatCurrency(totalSummary.pending)}</strong>
+        </S.SummaryItem>
+        <S.SummaryItem $color="#cf1322">
+          <span>Vencidas</span>
+          <strong>{formatCurrency(totalSummary.overdue)}</strong>
+        </S.SummaryItem>
+      </S.SummaryBar>
 
       <Card>
         <Table

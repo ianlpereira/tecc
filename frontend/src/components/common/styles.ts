@@ -74,6 +74,36 @@ export const FilterBar = styled.div`
   flex-wrap: wrap;
 `;
 
+export const SummaryBar = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.md};
+  margin-bottom: ${props => props.theme.spacing.lg};
+  flex-wrap: wrap;
+`;
+
+export const SummaryItem = styled.div<{ $color?: string }>`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-left: 4px solid ${props => props.$color || '#595959'};
+  min-width: 180px;
+
+  span {
+    font-size: 12px;
+    color: #888;
+  }
+
+  strong {
+    font-size: 18px;
+    font-weight: 600;
+    color: ${props => props.$color || '#262626'};
+  }
+`;
+
 export const StatusTag = styled.span<{ $status: string }>`
   display: inline-block;
   padding: 2px 8px;
