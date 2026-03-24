@@ -47,5 +47,6 @@ class UserResponse(BaseModel):
     full_name: Optional[str] = None
     role: str
     is_active: bool
+    must_change_password: bool = False
 
     model_config = {"from_attributes": True}

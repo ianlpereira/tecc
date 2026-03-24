@@ -9,3 +9,4 @@ export { PaymentMethodsPage } from './Settings/PaymentMethods';
 export { ReportsPage } from './Reports';
 export { default as LoginPage } from './Login';
 export { AdminUsersPage } from './Admin/Users';
+export { default as ChangePasswordPage } from './ChangePassword';

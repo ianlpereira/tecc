@@ -294,6 +294,7 @@ export interface AuthUser {
   full_name: string | null;
   role: 'admin' | 'user';
   is_active: boolean;
+  must_change_password: boolean;
 }
 
 export interface UserCreate {

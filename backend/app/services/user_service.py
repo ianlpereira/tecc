@@ -72,6 +72,7 @@ class UserService:
             hashed_password=hash_password(data.password),
             role=data.role,
             is_active=True,
+            must_change_password=True,
         )
         return await self.repository.create(user)
 
@@ -92,6 +93,7 @@ class UserService:
             user.is_active = data.is_active
         if data.password is not None:
             user.hashed_password = hash_password(data.password)
+            user.must_change_password = False
 
         await self.db.flush()
         await self.db.refresh(user)
@@ -109,6 +111,21 @@ class UserService:
         """Activate a user account."""
         user = await self.get_user(user_id)
         user.is_active = True
+        await self.db.flush()
+        await self.db.refresh(user)
+        return user
+
+    async def change_own_password(
+        self, user: User, current_password: str, new_password: str
+    ) -> User:
+        """Let a user change their own password. Verifies current password first."""
+        if not verify_password(current_password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Senha atual incorreta.",
+            )
+        user.hashed_password = hash_password(new_password)
+        user.must_change_password = False
         await self.db.flush()
         await self.db.refresh(user)
         return user

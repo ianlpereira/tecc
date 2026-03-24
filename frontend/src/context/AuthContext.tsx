@@ -8,6 +8,7 @@ interface AuthUser {
   full_name: string | null
   role: 'admin' | 'user'
   is_active: boolean
+  must_change_password: boolean
 }
 
 interface AuthContextValue {
@@ -18,6 +19,7 @@ interface AuthContextValue {
   isAdmin: boolean
   login: (username: string, password: string) => Promise<void>
   logout: () => void
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -65,6 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    const res = await apiClient.get<AuthUser>('/api/v1/auth/me')
+    setUser(res.data)
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
@@ -75,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAdmin: user?.role === 'admin',
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}

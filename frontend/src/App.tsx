@@ -21,6 +21,7 @@ import {
   ReportsPage,
   LoginPage,
   AdminUsersPage,
+  ChangePasswordPage,
 } from './pages'
 
 function App(): React.ReactElement {
@@ -37,6 +38,9 @@ function App(): React.ReactElement {
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<LoginPage />} />
+
+                {/* Change password — authenticated but no must_change_password guard */}
+                <Route path="/change-password" element={<PrivateRoute><ChangePasswordPage /></PrivateRoute>} />
 
                 {/* Protected routes */}
                 <Route path="/" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
