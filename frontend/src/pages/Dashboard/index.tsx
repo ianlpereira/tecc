@@ -8,12 +8,13 @@ import {
   ExclamationCircleOutlined,
   CheckCircleOutlined,
   CalendarOutlined,
+  AlertOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
-import { useBills, useBranches, useVendors, useCategories, useMarkBillAsPaid, useActivePaymentMethods } from '../../hooks';
+import { useBills, useBranches, useVendors, useCategories, useMarkBillAsPaid, useActivePaymentMethods, useDueTodaySummary } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
@@ -44,6 +45,9 @@ export function DashboardPage(): React.ReactElement {
   const { data: categories = [] } = useCategories();
   const { mutate: markAsPaid } = useMarkBillAsPaid();
   const { data: paymentMethods = [] } = useActivePaymentMethods();
+
+  // Epic 15: due today summary
+  const { data: dueTodaySummary } = useDueTodaySummary(currentBranch?.id);
 
   // F2: Pay modal state
   const [payModalBill, setPayModalBill] = useState<Bill | null>(null);
@@ -226,6 +230,35 @@ export function DashboardPage(): React.ReactElement {
       </S.PageHeader>
 
       <S.StatsGrid>
+        {/* Epic 15: A Pagar Hoje card with dynamic color */}
+        <S.StatCard>
+          <S.StatIcon $bg={
+            dueTodaySummary?.overdue_count && dueTodaySummary.overdue_count > 0
+              ? '#f5222d'
+              : dueTodaySummary?.due_today_count && dueTodaySummary.due_today_count > 0
+              ? '#faad14'
+              : '#52c41a'
+          }>
+            <AlertOutlined />
+          </S.StatIcon>
+          <S.StatLabel>A Pagar Hoje</S.StatLabel>
+          <S.StatValue $color={
+            dueTodaySummary?.overdue_count && dueTodaySummary.overdue_count > 0
+              ? '#f5222d'
+              : dueTodaySummary?.due_today_count && dueTodaySummary.due_today_count > 0
+              ? '#faad14'
+              : undefined
+          }>
+            {formatCurrency(dueTodaySummary?.total_amount ?? 0)}
+          </S.StatValue>
+          {dueTodaySummary && (
+            <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+              {dueTodaySummary.count} conta(s)
+              {dueTodaySummary.overdue_count > 0 && ` — ${dueTodaySummary.overdue_count} atrasada(s)`}
+            </div>
+          )}
+        </S.StatCard>
+
         <S.StatCard>
           <S.StatIcon $bg="#1890ff">
             <FileTextOutlined />
