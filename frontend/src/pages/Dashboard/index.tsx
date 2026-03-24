@@ -13,17 +13,12 @@ import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
-import { useBills, useBranches, useVendors, useCategories, useMarkBillAsPaid } from '../../hooks';
+import { useBills, useBranches, useVendors, useCategories, useMarkBillAsPaid, useActivePaymentMethods } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
 import * as S from '../../components/common/styles';
 import { parseLocalDate, isBillOverdue } from '../../utils/date';
-
-const BANKS = [
-  'Bradesco', 'Itaú', 'Santander', 'Caixa', 'Banco do Brasil',
-  'Nubank', 'Inter', 'C6', 'Sicredi', 'Sicoob', 'Outro',
-];
 
 const statusLabels: Record<BillStatus, string> = {
   [BillStatus.PENDING]: 'Pendente',
@@ -48,6 +43,7 @@ export function DashboardPage(): React.ReactElement {
   const { data: vendors = [] } = useVendors();
   const { data: categories = [] } = useCategories();
   const { mutate: markAsPaid } = useMarkBillAsPaid();
+  const { data: paymentMethods = [] } = useActivePaymentMethods();
 
   // F2: Pay modal state
   const [payModalBill, setPayModalBill] = useState<Bill | null>(null);
@@ -340,7 +336,7 @@ export function DashboardPage(): React.ReactElement {
               allowClear
               value={payBank}
               onChange={(v) => setPayBank(v)}
-              options={BANKS.map((b) => ({ value: b, label: b }))}
+              options={paymentMethods.map((pm: any) => ({ value: pm.name, label: pm.name }))}
             />
           </Form.Item>
           <Form.Item label="Data do Pagamento">

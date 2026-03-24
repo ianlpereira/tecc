@@ -183,3 +183,22 @@ export interface VehicleUpdate {
   branch_id?: number;
   notes?: string | null;
 }
+
+// Payment Method types
+export interface PaymentMethod {
+  id: number;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentMethodCreate {
+  name: string;
+  is_active?: boolean;
+}
+
+export interface PaymentMethodUpdate {
+  name?: string;
+  is_active?: boolean;
+}

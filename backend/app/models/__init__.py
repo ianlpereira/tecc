@@ -10,6 +10,7 @@ from app.models.category import Category
 from app.models.bill import Bill, BillStatus
 from app.models.bill_attachment import BillAttachment
 from app.models.vehicle import Vehicle
+from app.models.payment_method import PaymentMethod
 
 __all__ = [
     "Base",
@@ -21,5 +22,6 @@ __all__ = [
     "BillStatus",
     "BillAttachment",
     "Vehicle",
+    "PaymentMethod",
 ]
 

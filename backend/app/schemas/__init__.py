@@ -37,6 +37,11 @@ from app.schemas.vehicle import (
     VehicleUpdate,
     VehicleResponse,
 )
+from app.schemas.payment_method import (
+    PaymentMethodCreate,
+    PaymentMethodUpdate,
+    PaymentMethodResponse,
+)
 
 __all__ = [
     "BaseSchema",
@@ -63,4 +68,7 @@ __all__ = [
     "VehicleCreate",
     "VehicleUpdate",
     "VehicleResponse",
+    "PaymentMethodCreate",
+    "PaymentMethodUpdate",
+    "PaymentMethodResponse",
 ]

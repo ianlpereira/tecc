@@ -6,17 +6,12 @@ import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
 import { BillForm } from '../../components/BillForm';
-import { useBills, useDeleteBill, useBranches, useVendors, useCategories, useMarkBillAsPaid } from '../../hooks';
+import { useBills, useDeleteBill, useBranches, useVendors, useCategories, useMarkBillAsPaid, useActivePaymentMethods } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
 import * as S from '../../components/common/styles';
 import { formatDate, isBillOverdue } from '../../utils/date';
-
-const BANKS = [
-  'Bradesco', 'Itaú', 'Santander', 'Caixa', 'Banco do Brasil',
-  'Nubank', 'Inter', 'C6', 'Sicredi', 'Sicoob', 'Outro',
-];
 
 const statusLabels: Record<BillStatus, string> = {
   [BillStatus.PENDING]: 'Pendente',
@@ -41,6 +36,7 @@ export function BillsPage(): React.ReactElement {
   const { data: categories = [] } = useCategories();
   const { mutate: deleteBill } = useDeleteBill();
   const { mutate: markAsPaid } = useMarkBillAsPaid();
+  const { data: paymentMethods = [] } = useActivePaymentMethods();
   
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingBill, setEditingBill] = React.useState<Bill | null>(null);
@@ -485,7 +481,7 @@ export function BillsPage(): React.ReactElement {
               allowClear
               value={payBank}
               onChange={(v) => setPayBank(v)}
-              options={BANKS.map((b) => ({ value: b, label: b }))}
+              options={paymentMethods.map((pm) => ({ value: pm.name, label: pm.name }))}
             />
           </Form.Item>
           <Form.Item label="Data do Pagamento">

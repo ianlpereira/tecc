@@ -22,6 +22,9 @@ import type {
   Vehicle,
   VehicleCreate,
   VehicleUpdate,
+  PaymentMethod,
+  PaymentMethodCreate,
+  PaymentMethodUpdate,
 } from '../types';
 
 const API_PREFIX = '/api/v1';
@@ -237,5 +240,38 @@ export const vehicleApi = {
   createBill: async (vehicleId: number, data: BillCreate): Promise<Bill> => {
     const response = await apiClient.post(`${API_PREFIX}/vehicles/${vehicleId}/bills`, data);
     return response.data;
+  },
+};
+
+// ============ PAYMENT METHODS ============
+
+export const paymentMethodApi = {
+  getAll: async (): Promise<PaymentMethod[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/payment-methods`);
+    return response.data;
+  },
+
+  getActive: async (): Promise<PaymentMethod[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/payment-methods/active`);
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<PaymentMethod> => {
+    const response = await apiClient.get(`${API_PREFIX}/payment-methods/${id}`);
+    return response.data;
+  },
+
+  create: async (data: PaymentMethodCreate): Promise<PaymentMethod> => {
+    const response = await apiClient.post(`${API_PREFIX}/payment-methods`, data);
+    return response.data;
+  },
+
+  update: async (id: number, data: PaymentMethodUpdate): Promise<PaymentMethod> => {
+    const response = await apiClient.put(`${API_PREFIX}/payment-methods/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await apiClient.delete(`${API_PREFIX}/payment-methods/${id}`);
   },
 };

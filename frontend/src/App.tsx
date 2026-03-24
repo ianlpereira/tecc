@@ -15,6 +15,7 @@ import {
   BillsPage,
   VehiclesPage,
   NotFoundPage,
+  PaymentMethodsPage,
 } from './pages'
 
 function App(): React.ReactElement {
@@ -34,6 +35,7 @@ function App(): React.ReactElement {
               <Route path="/vendors" element={<VendorsPage />} />
               <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/vehicles" element={<VehiclesPage />} />
+              <Route path="/settings/payment-methods" element={<PaymentMethodsPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Router>

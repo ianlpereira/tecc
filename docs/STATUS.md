@@ -91,36 +91,37 @@
 
 ---
 
-## 📋 ÉPICO 11 — Meios de Pagamento CRUD (PLANEJADO)
+## ✅ ÉPICO 11 — Meios de Pagamento CRUD (COMPLETO)
 
-- [ ] DatePicker: filtrar por `due_date` específica
-- [ ] MonthPicker: filtrar por mês/ano
-- [ ] Toggle de ordenação ASC/DESC por `due_date`
-- [ ] Barra de filtros unificada atualizada
-
----
-
-## 📋 ÉPICO 11 — Meios de Pagamento CRUD (PLANEJADO)
-
-> **Documentação:** `docs/EPIC-11-PAYMENT-METHODS.md`
-> **Prioridade:** 🟡 Alta (pré-requisito do Epic 14)
+> **Documentação:** `docs/EPIC-11-COMPLETE.md`
+> **Concluído em:** 25/03/2026
+> **Migration:** `59d4b9c9a4ad`
 
 ### Backend
 
-- [ ] Model `PaymentMethod` (id, name, is_active, timestamps)
-- [ ] Tabela `payment_methods` + seed com 10 bancos iniciais
-- [ ] CRUD `/api/v1/payment-methods`
-- [ ] Migration Alembic
+- [x] Model `PaymentMethod` (id, name, is_active, timestamps)
+- [x] Tabela `payment_methods` + seed com 10 bancos iniciais
+- [x] Repository + Service com validação de unicidade
+- [x] CRUD `/api/v1/payment-methods` + endpoint `/active`
+- [x] Migration `59d4b9c9a4ad` aplicada
 
 ### Frontend
 
-- [ ] Página `/settings/payment-methods` com CRUD
-- [ ] Campo `payment_bank` substituído por Select vinculado ao CRUD
-- [ ] Hook `usePaymentMethods`
+- [x] `types/index.ts` — interfaces `PaymentMethod`, `PaymentMethodCreate`, `PaymentMethodUpdate`
+- [x] `api.ts` — `paymentMethodApi` (getAll, getActive, getById, create, update, delete)
+- [x] `hooks/usePaymentMethods.ts` — `usePaymentMethods`, `useActivePaymentMethods`, mutations
+- [x] `pages/Settings/PaymentMethods/index.tsx` — CRUD completo com tabela + modal
+- [x] `App.tsx` — rota `/settings/payment-methods`
+- [x] `Layout/index.tsx` — item "Meios de Pagamento" no sidebar
+- [x] `Bills/index.tsx` — `const BANKS` removido → `useActivePaymentMethods()`
+- [x] `Dashboard/index.tsx` — idem
+- [x] `tsc --noEmit` → EXIT:0
+
+**Status: ✅ CONCLUÍDO**
 
 ---
 
-## 📋 ÉPICO 12 — Recorrência com Datas Manuais (PLANEJADO)
+## 📋 ÉPICO 13 — Edição em Massa de Recorrência (PLANEJADO)
 
 > **Documentação:** `docs/EPIC-12-MANUAL-RECURRENCE.md`
 > **Prioridade:** 🟡 Média

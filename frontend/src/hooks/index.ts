@@ -9,3 +9,4 @@ export * from './useBills';
 export * from './useBillAttachments';
 export * from './useVehicles';
 export * from './useFipe';
+export * from './usePaymentMethods';
