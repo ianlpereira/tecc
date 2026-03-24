@@ -1,6 +1,106 @@
 # 📊 Status Projeto — Épicos 1–16
 
-> **Última Atualização:** 24 de Março de 2026
+> **Última Atualização:** Épicos 12–16 Completos ✅
+
+---
+
+## ✅ ÉPICO 16 — Relatórios (COMPLETO)
+
+> **Concluído:** 2025
+
+### Backend
+- [x] `GET /api/v1/bills/report` — endpoint com todos os filtros (data, mês, filiais, fornecedores, categoria, status, banco)
+- [x] `get_for_report()` no repository — JOIN com Vendor, Category, Branch, Vehicle
+- [x] `BillReportRow`, `BillReportSummary`, `BillReportResponse` schemas
+
+### Frontend
+- [x] `BillReportRow`, `BillReportSummary`, `BillReportResponse` types
+- [x] `billApi.getReport()` + `useReport()` hook (trigger manual via refetch)
+- [x] `/reports` page com filtros, tabela completa, painel resumo
+- [x] Exportar CSV (client-side blob, UTF-8 BOM)
+- [x] Menu lateral "Relatórios" com `BarChartOutlined`
+- [x] Rota `/reports` em `App.tsx`
+
+**Status: ✅ CONCLUÍDO**
+
+---
+
+## ✅ ÉPICO 15 — Dashboard "A Pagar Hoje" (COMPLETO)
+
+> **Concluído:** 2025
+
+### Backend
+- [x] `GET /api/v1/bills/summary/due-today` — retorna `count, total_amount, overdue_count, overdue_amount, due_today_count, due_today_amount`
+- [x] `DueTodaySummary` schema
+
+### Frontend
+- [x] `DueTodaySummary` type
+- [x] `billApi.getDueTodaySummary()` + `useDueTodaySummary()` hook
+- [x] Dashboard: novo card "A Pagar Hoje" como primeiro card
+- [x] Cor dinâmica: vermelho se atrasadas, amarelo se vence hoje, verde se nenhuma
+
+**Status: ✅ CONCLUÍDO**
+
+---
+
+## ✅ ÉPICO 14 — Ações em Lote (COMPLETO)
+
+> **Concluído:** 2025
+
+### Backend
+- [x] `POST /api/v1/bills/batch-delete` — soft-delete em massa
+- [x] `POST /api/v1/bills/batch-mark-paid` — marcar como pagas em lote (pula já pagas/canceladas)
+- [x] `BatchDeleteRequest`, `BatchMarkPaidRequest`, `BatchDeleteResponse`, `BatchMarkPaidResponse` schemas
+
+### Frontend
+- [x] Tipos correspondentes em `types/index.ts`
+- [x] `batchDelete` + `batchMarkPaid` no `billApi`
+- [x] `useBatchDeleteBills()` + `useBatchMarkPaidBills()` hooks
+- [x] Bills page: row selection com checkbox, barra contextual de ações
+- [x] Modal para marcar em lote como pagas com seletor de banco e data
+- [x] Popconfirm para exclusão em lote
+
+**Status: ✅ CONCLUÍDO**
+
+---
+
+## ✅ ÉPICO 13 — Edição em Massa de Recorrência (COMPLETO)
+
+> **Concluído:** 2025
+
+### Backend
+- [x] `PUT /api/v1/bills/{id}/recurrence` — atualiza com escopo
+- [x] `update_bill_recurrence()` service — scopes: `this`, `this_and_next`, `all`
+- [x] Aplica delta de datas para `this_and_next`; pula pagas/canceladas
+- [x] `BillRecurrenceUpdate` schema
+
+### Frontend
+- [x] `BillRecurrenceUpdate` type
+- [x] `billApi.updateRecurrence()` + `useUpdateBillRecurrence()` hook
+- [x] BillForm intercepta submit de edição quando `bill.recurrence_group_id` existe
+- [x] Modal de escopo: "Somente esta" / "Esta e as próximas" / "Todas"
+
+**Status: ✅ CONCLUÍDO**
+
+---
+
+## ✅ ÉPICO 12 — Recorrência com Datas Manuais (COMPLETO)
+
+> **Concluído:** 2025
+
+### Backend
+- [x] `recurrence_dates: Optional[List[date]]` em `BillCreate`
+- [x] `create_bill()` suporta modo `manual_dates`: valida ≥2 datas, sem duplicatas, cria uma conta por data
+- [x] Coexiste com os modos `interval` e `fixed_day`
+
+### Frontend
+- [x] `recurrence_dates?: string[]` em `BillCreate` type
+- [x] BillForm: terceiro Radio "Datas manuais" no seletor de tipo de recorrência
+- [x] Lista dinâmica de DatePickers com botão "+ Adicionar data" e "✕" para remover
+- [x] Preview: "Serão criadas X parcelas nas datas selecionadas"
+- [x] Mínimo de 2 datas obrigatório
+
+**Status: ✅ CONCLUÍDO**
 
 ---
 

@@ -25,11 +25,11 @@
 | Epic 9 | Correção Fuso Horário (Bug -1 dia) | ✅ Completo | 🔴 Crítica |
 | Epic 10 | Filtros de Data em Contas | ✅ Completo | 🟡 Alta |
 | Epic 11 | Meios de Pagamento (CRUD) | ✅ Completo | 🟡 Alta |
-| Epic 12 | Recorrência com Datas Manuais | 📋 Planejado | 🟡 Média |
-| Epic 13 | Edição em Massa de Recorrência | 📋 Planejado | 🟡 Alta |
-| Epic 14 | Ações em Lote | 📋 Planejado | 🟡 Média |
-| Epic 15 | Dashboard — Card "A Pagar Hoje" | �📋 Planejado | 🟢 Média |
-| Epic 16 | Relatórios | 📋 Planejado | 🟢 Alta |
+| Epic 12 | Recorrência com Datas Manuais | ✅ Completo | 🟡 Média |
+| Epic 13 | Edição em Massa de Recorrência | ✅ Completo | 🟡 Alta |
+| Epic 14 | Ações em Lote | ✅ Completo | 🟡 Média |
+| Epic 15 | Dashboard — Card "A Pagar Hoje" | ✅ Completo | 🟢 Média |
+| Epic 16 | Relatórios | ✅ Completo | 🟢 Alta |
 
 ---
 
