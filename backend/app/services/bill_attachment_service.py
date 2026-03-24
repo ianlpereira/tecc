@@ -73,6 +73,6 @@ class BillAttachmentService:
         attachment = await self.repository.get_by_bill_and_id(bill_id, attachment_id)
         if not attachment:
             return False
-        await self.repository.delete(attachment_id)
+        await self.repository.hard_delete(attachment_id)
         await self.repository.commit()
         return True
