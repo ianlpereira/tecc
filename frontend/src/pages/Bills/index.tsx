@@ -50,6 +50,7 @@ export function BillsPage(): React.ReactElement {
   const [dateFilter, setDateFilter] = useState<dayjs.Dayjs | null>(null);
   const [monthFilter, setMonthFilter] = useState<dayjs.Dayjs | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [pageSize, setPageSize] = useState(15);
 
   // Pay modal state
   const [payModalBill, setPayModalBill] = useState<Bill | null>(null);
@@ -526,7 +527,12 @@ export function BillsPage(): React.ReactElement {
           dataSource={filteredBills}
           rowKey="id"
           loading={isLoading}
-          pagination={{ pageSize: 15 }}
+          pagination={{
+            pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '15', '25', '50', '100'],
+            onShowSizeChange: (_current: number, size: number) => setPageSize(size),
+          }}
           scroll={{ x: 1200 }}
           rowSelection={{
             selectedRowKeys,
