@@ -24,6 +24,7 @@ class BillRepository(BaseRepository[Bill]):
             select(Bill)
             .options(joinedload(Bill.payment_method))
             .where(Bill.deleted_at == None)  # noqa: E711
+            .order_by(Bill.due_date, Bill.id)
         )
         return result.unique().scalars().all()
 
@@ -48,6 +49,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.branch_id == branch_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
+            .order_by(Bill.due_date, Bill.id)
         )
         return result.unique().scalars().all()
 
@@ -60,6 +62,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.branch_id.in_(branch_ids),
                 Bill.deleted_at == None,  # noqa: E711
             )
+            .order_by(Bill.due_date, Bill.id)
         )
         return result.unique().scalars().all()
 
@@ -72,6 +75,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.vendor_id == vendor_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
+            .order_by(Bill.due_date, Bill.id)
         )
         return result.unique().scalars().all()
 
@@ -84,6 +88,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.status == status,
                 Bill.deleted_at == None,  # noqa: E711
             )
+            .order_by(Bill.due_date, Bill.id)
         )
         return result.unique().scalars().all()
 
