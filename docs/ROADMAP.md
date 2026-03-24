@@ -23,7 +23,7 @@
 | Epic 7 | Controle de Frota | ✅ Completo | — |
 | Epic 8 | Soft Delete | ✅ Completo | — |
 | Epic 9 | Correção Fuso Horário (Bug -1 dia) | ✅ Completo | 🔴 Crítica |
-| Epic 10 | Filtros de Data em Contas | 📋 Planejado | 🟡 Alta |
+| Epic 10 | Filtros de Data em Contas | ✅ Completo | 🟡 Alta |
 | Epic 11 | Meios de Pagamento (CRUD) | 📋 Planejado | 🟡 Alta |
 | Epic 12 | Recorrência com Datas Manuais | 📋 Planejado | 🟡 Média |
 | Epic 13 | Edição em Massa de Recorrência | 📋 Planejado | 🟡 Alta |

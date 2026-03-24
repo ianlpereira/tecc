@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Table, Button, Modal, Select, Popconfirm, message, Tooltip, Badge, Space, Form, DatePicker } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined, PaperClipOutlined, FilterOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined, PaperClipOutlined, FilterOutlined, CheckCircleOutlined, SwapOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
@@ -49,6 +49,9 @@ export function BillsPage(): React.ReactElement {
   const [categoryFilter, setCategoryFilter] = React.useState<number | 'all'>('all');
   const [vendorFilter, setVendorFilter] = React.useState<number | 'all'>('all');
   const [branchFilter, setBranchFilter] = React.useState<number | 'all'>('all');
+  const [dateFilter, setDateFilter] = useState<dayjs.Dayjs | null>(null);
+  const [monthFilter, setMonthFilter] = useState<dayjs.Dayjs | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Pay modal state
   const [payModalBill, setPayModalBill] = useState<Bill | null>(null);
@@ -86,9 +89,21 @@ export function BillsPage(): React.ReactElement {
     if (branchFilter !== 'all') {
       result = result.filter((bill: Bill) => bill.branch_id === branchFilter);
     }
+    if (dateFilter) {
+      const dateStr = dateFilter.format('YYYY-MM-DD');
+      result = result.filter((bill: Bill) => bill.due_date === dateStr);
+    }
+    if (monthFilter) {
+      const prefix = monthFilter.format('YYYY-MM');
+      result = result.filter((bill: Bill) => bill.due_date.startsWith(prefix));
+    }
+    result = [...result].sort((a: Bill, b: Bill) => {
+      const cmp = a.due_date.localeCompare(b.due_date);
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
 
     return result;
-  }, [bills, statusFilter, categoryFilter, vendorFilter, branchFilter]);
+  }, [bills, statusFilter, categoryFilter, vendorFilter, branchFilter, dateFilter, monthFilter, sortOrder]);
 
   const totalSummary = useMemo(() => {
     const total = filteredBills.reduce((sum: number, b: Bill) => sum + b.amount, 0);
@@ -99,13 +114,16 @@ export function BillsPage(): React.ReactElement {
   }, [filteredBills]);
 
   const hasActiveFilters =
-    statusFilter !== 'all' || categoryFilter !== 'all' || vendorFilter !== 'all' || branchFilter !== 'all';
+    statusFilter !== 'all' || categoryFilter !== 'all' || vendorFilter !== 'all' || branchFilter !== 'all' || !!dateFilter || !!monthFilter || sortOrder !== 'asc';
 
   const handleClearFilters = () => {
     setStatusFilter('all');
     setCategoryFilter('all');
     setVendorFilter('all');
     setBranchFilter('all');
+    setDateFilter(null);
+    setMonthFilter(null);
+    setSortOrder('asc');
   };
 
   const handleDelete = (id: number) => {
@@ -241,7 +259,19 @@ export function BillsPage(): React.ReactElement {
       align: 'right',
     },
     {
-      title: 'Vencimento',
+      title: (
+        <Space>
+          Vencimento
+          <Button
+            type="text"
+            size="small"
+            icon={<SwapOutlined rotate={90} />}
+            onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
+            title={sortOrder === 'asc' ? 'Ordenar decrescente' : 'Ordenar crescente'}
+            style={{ color: sortOrder !== 'asc' ? '#1890ff' : undefined }}
+          />
+        </Space>
+      ),
       dataIndex: 'due_date',
       key: 'due_date',
       render: (date: string) => formatDate(date),
@@ -364,6 +394,23 @@ export function BillsPage(): React.ReactElement {
               label: b.is_headquarters ? `${b.name} (Matriz)` : b.name,
             })) ?? []),
           ]}
+        />
+        <DatePicker
+          placeholder="Filtrar por data"
+          format="DD/MM/YYYY"
+          value={dateFilter}
+          onChange={(d) => { setDateFilter(d); if (d) setMonthFilter(null); }}
+          allowClear
+          style={{ width: 160 }}
+        />
+        <DatePicker
+          picker="month"
+          placeholder="Filtrar por mês"
+          format="MM/YYYY"
+          value={monthFilter}
+          onChange={(d) => { setMonthFilter(d); if (d) setDateFilter(null); }}
+          allowClear
+          style={{ width: 140 }}
         />
         {hasActiveFilters && (
           <Button onClick={handleClearFilters} icon={<FilterOutlined />}>

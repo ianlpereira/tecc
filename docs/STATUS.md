@@ -72,12 +72,26 @@
 
 ---
 
-## 📋 ÉPICO 10 — Filtros de Data em Contas a Pagar (PLANEJADO)
+## ✅ ÉPICO 10 — Filtros de Data em Contas a Pagar (COMPLETO)
 
 > **Documentação:** `docs/EPIC-10-DATE-FILTERS.md`
-> **Prioridade:** 🟡 Alta
+> **Concluído em:** 25/03/2026
 
 ### Frontend
+
+- [x] `Bills/index.tsx` — DatePicker "Filtrar por data" (filtro por `due_date` exato)
+- [x] `Bills/index.tsx` — MonthPicker "Filtrar por mês" (filtro por prefixo `YYYY-MM`)
+- [x] `Bills/index.tsx` — Filtros de data e mês são mutuamente exclusivos
+- [x] `Bills/index.tsx` — Coluna "Vencimento" com botão de ordenação ASC/DESC
+- [x] `Bills/index.tsx` — `filteredBills` useMemo inclui date/month/sort
+- [x] `Bills/index.tsx` — `hasActiveFilters` detecta novos filtros
+- [x] `Bills/index.tsx` — `handleClearFilters` reseta todos os novos estados
+
+**Status: ✅ CONCLUÍDO**
+
+---
+
+## 📋 ÉPICO 11 — Meios de Pagamento CRUD (PLANEJADO)
 
 - [ ] DatePicker: filtrar por `due_date` específica
 - [ ] MonthPicker: filtrar por mês/ano
