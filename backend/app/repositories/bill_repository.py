@@ -125,6 +125,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.vehicle_id == vehicle_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
+            .order_by(Bill.due_date, Bill.id)
         )
         return result.unique().scalars().all()
 
@@ -137,6 +138,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.category_id == category_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
+            .order_by(Bill.due_date, Bill.id)
         )
         return result.unique().scalars().all()
 
