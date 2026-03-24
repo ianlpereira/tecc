@@ -1,6 +1,28 @@
-# 📊 Status Projeto — Épicos 1–16
+# 📊 Status Projeto — Épicos 1–17
 
-> **Última Atualização:** Épicos 12–16 Completos ✅
+> **Última Atualização:** Épico 17 Completo ✅
+
+---
+
+## ✅ ÉPICO 17 — Vincular Contas a Meios de Pagamento (COMPLETO)
+
+> **Concluído:** 2025 | **Commit:** `841c360`
+
+### Backend
+- [x] `payment_method_id` FK (`bills → payment_methods`) + `relationship` + `@property payment_method_name`
+- [x] Alembic migration `e7c4d1ce91a8`
+- [x] Schemas: `BillCreate`, `BillUpdate`, `BillRecurrenceUpdate`, `BillResponse`, `BillReportRow`
+- [x] Service: `create_bill`, `update_bill`, `update_bill_recurrence`, `get_report`
+- [x] Router: todos os endpoints de criação/edição + filtro no report
+- [x] Repository: `joinedload` em `get_by_id`; JOIN + filtro em `get_for_report`
+
+### Frontend
+- [x] Types: `payment_method_id`/`payment_method_name` em `Bill`, `BillCreate`, `BillUpdate`, `BillRecurrenceUpdate`, `BillReportRow`
+- [x] `BillForm`: campo Select "Meio de Pagamento" (criar + editar, incluindo edição em massa de recorrência)
+- [x] Página Contas: coluna "Meio de Pgto"
+- [x] Página Relatórios: coluna + filtro + exportação CSV
+
+**Status: ✅ CONCLUÍDO**
 
 ---
 
