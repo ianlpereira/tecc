@@ -67,15 +67,16 @@ class UserRepository(BaseRepository[User]):
 
     async def admin_exists(self) -> bool:
         """Check if at least one active admin user exists."""
+        from sqlalchemy import func
         from app.models.user import UserRole
         result = await self.db.execute(
-            select(User).where(
+            select(func.count()).select_from(User).where(
                 User.role == UserRole.ADMIN,
                 User.is_active == True,  # noqa: E712
                 User.deleted_at == None,  # noqa: E711
             )
         )
-        return result.scalar_one_or_none() is not None
+        return (result.scalar_one() or 0) > 0
 
     async def count_active_admins(self) -> int:
         """Return the number of active admin users."""
