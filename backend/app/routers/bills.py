@@ -105,35 +105,32 @@ async def get_due_today_summary(
 
 @router.get("/report", response_model=BillReportResponse)
 async def get_report(
-    date_from: Optional[date] = Query(None),
-    date_to: Optional[date] = Query(None),
+    due_date_from: Optional[date] = Query(None),
+    due_date_to: Optional[date] = Query(None),
     month: Optional[str] = Query(None, description="Format: YYYY-MM"),
     branch_ids: Optional[str] = Query(None),
     vendor_ids: Optional[str] = Query(None),
-    category_ids: Optional[str] = Query(None),
+    category_id: Optional[int] = Query(None),
     vehicle_ids: Optional[str] = Query(None),
-    statuses: Optional[str] = Query(None),
-    payment_banks: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    payment_bank: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
     """Get report with optional filters and totals."""
     def parse_ids(s):
         return [int(x) for x in s.split(",") if x.strip()] if s else None
 
-    def parse_str_list(s):
-        return [x.strip() for x in s.split(",") if x.strip()] if s else None
-
     service = BillService(db)
     return await service.get_report(
-        date_from=date_from,
-        date_to=date_to,
+        date_from=due_date_from,
+        date_to=due_date_to,
         month=month,
         branch_ids=parse_ids(branch_ids),
         vendor_ids=parse_ids(vendor_ids),
-        category_ids=parse_ids(category_ids),
+        category_ids=[category_id] if category_id else None,
         vehicle_ids=parse_ids(vehicle_ids),
-        statuses=parse_str_list(statuses),
-        payment_banks=parse_str_list(payment_banks),
+        statuses=[status] if status else None,
+        payment_banks=[payment_bank] if payment_bank else None,
     )
 
 
