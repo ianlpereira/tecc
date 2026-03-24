@@ -39,9 +39,13 @@ class BillUpdate(BaseSchema):
     amount: float | None = None
     due_date: date | None = None
     status: BillStatus | None = None
+    invoice_number: str | None = None
     notes: str | None = None
     payment_bank: str | None = None
     paid_at: date | None = None
+    vendor_id: int | None = None
+    category_id: int | None = None
+    branch_id: int | None = None
     vehicle_id: int | None = None
 
 
@@ -79,6 +83,7 @@ class BillRecurrenceUpdate(BaseSchema):
     description: str | None = None
     amount: float | None = None
     due_date: date | None = None
+    invoice_number: str | None = None
     notes: str | None = None
     vendor_id: int | None = None
     category_id: int | None = None

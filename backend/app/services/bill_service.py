@@ -224,9 +224,14 @@ class BillService:
         amount: float = None,
         due_date: date = None,
         status: BillStatus = None,
+        invoice_number: str = None,
         notes: str = None,
         payment_bank: str = None,
         paid_at: date = None,
+        vendor_id: int = None,
+        category_id: int = None,
+        branch_id: int = None,
+        vehicle_id: int = None,
     ) -> Optional[Bill]:
         """Update a bill."""
         bill = await self.repository.get_by_id(bill_id)
@@ -244,12 +249,22 @@ class BillService:
             update_data["due_date"] = due_date
         if status is not None:
             update_data["status"] = status
+        if invoice_number is not None:
+            update_data["invoice_number"] = invoice_number
         if notes is not None:
             update_data["notes"] = notes
         if payment_bank is not None:
             update_data["payment_bank"] = payment_bank
         if paid_at is not None:
             update_data["paid_at"] = paid_at
+        if vendor_id is not None:
+            update_data["vendor_id"] = vendor_id
+        if category_id is not None:
+            update_data["category_id"] = category_id
+        if branch_id is not None:
+            update_data["branch_id"] = branch_id
+        if vehicle_id is not None:
+            update_data["vehicle_id"] = vehicle_id
 
         await self.repository.update(bill_id, update_data)
         await self.repository.commit()
@@ -296,6 +311,7 @@ class BillService:
         description: str = None,
         amount: float = None,
         due_date: date = None,
+        invoice_number: str = None,
         notes: str = None,
         vendor_id: int = None,
         category_id: int = None,
@@ -313,6 +329,8 @@ class BillService:
             if amount <= 0:
                 raise ValueError("Amount must be greater than 0")
             update_fields["amount"] = amount
+        if invoice_number is not None:
+            update_fields["invoice_number"] = invoice_number
         if notes is not None:
             update_fields["notes"] = notes
         if vendor_id is not None:

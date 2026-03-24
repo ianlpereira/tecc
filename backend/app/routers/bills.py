@@ -180,7 +180,14 @@ async def update_bill(bill_id: int, schema: BillUpdate, db: AsyncSession = Depen
             schema.amount,
             schema.due_date,
             schema.status,
+            schema.invoice_number,
             schema.notes,
+            schema.payment_bank,
+            schema.paid_at,
+            schema.vendor_id,
+            schema.category_id,
+            schema.branch_id,
+            schema.vehicle_id,
         )
         if not updated:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill not found")
@@ -211,6 +218,7 @@ async def update_bill_recurrence(
             schema.description,
             schema.amount,
             schema.due_date,
+            schema.invoice_number,
             schema.notes,
             schema.vendor_id,
             schema.category_id,
