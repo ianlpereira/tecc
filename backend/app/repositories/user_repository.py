@@ -76,3 +76,16 @@ class UserRepository(BaseRepository[User]):
             )
         )
         return result.scalar_one_or_none() is not None
+
+    async def count_active_admins(self) -> int:
+        """Return the number of active admin users."""
+        from sqlalchemy import func
+        from app.models.user import UserRole
+        result = await self.db.execute(
+            select(func.count()).where(
+                User.role == UserRole.ADMIN,
+                User.is_active == True,  # noqa: E712
+                User.deleted_at == None,  # noqa: E711
+            )
+        )
+        return result.scalar_one()

@@ -85,6 +85,15 @@ class UserService:
         if data.full_name is not None:
             user.full_name = data.full_name
         if data.role is not None:
+            if (
+                user.role == UserRole.ADMIN
+                and data.role != UserRole.ADMIN
+                and await self.repository.count_active_admins() <= 1
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Não é possível remover o papel de administrador do único admin ativo.",
+                )
             user.role = data.role
         if data.is_active is not None:
             user.is_active = data.is_active
@@ -99,6 +108,14 @@ class UserService:
     async def deactivate_user(self, user_id: int) -> User:
         """Deactivate a user account."""
         user = await self.get_user(user_id)
+        if (
+            user.role == UserRole.ADMIN
+            and await self.repository.count_active_admins() <= 1
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Não é possível desativar o único administrador ativo.",
+            )
         user.is_active = False
         await self.db.flush()
         await self.db.refresh(user)
