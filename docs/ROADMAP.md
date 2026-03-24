@@ -10,20 +10,170 @@
 
 ---
 
-## 📋 Épico 8: Soft Delete em Todas as Entidades (PLANEJADO)
+## �️ Roadmap de Épicos
 
-**Status:** 📋 **PLANEJADO** — 24/03/2026
-**Documentação:** `docs/EPIC-8-SOFT-DELETE-PLANNING.md`
+| Épico | Nome | Status | Prioridade |
+|-------|------|--------|------------|
+| Epic 1 | Foundation | ✅ Completo | — |
+| Epic 2 | Backend CRUD | ✅ Completo | — |
+| Epic 3 | Frontend | ✅ Completo | — |
+| Epic 4 | Hierarquia Matriz-Filial | ✅ Completo | — |
+| Epic 5 | UX & Bug Fixes | ✅ Completo | — |
+| Epic 6 | Funcionalidades Avançadas | ✅ Completo | — |
+| Epic 7 | Controle de Frota | ✅ Completo | — |
+| Epic 8 | Soft Delete | ✅ Completo | — |
+| **Epic 9** | **Correção Fuso Horário (Bug -1 dia)** | **📋 Planejado** | **🔴 Crítica** |
+| Epic 10 | Filtros de Data em Contas | 📋 Planejado | 🟡 Alta |
+| Epic 11 | Meios de Pagamento (CRUD) | 📋 Planejado | 🟡 Alta |
+| Epic 12 | Recorrência com Datas Manuais | 📋 Planejado | 🟡 Média |
+| Epic 13 | Edição em Massa de Recorrência | 📋 Planejado | 🟡 Alta |
+| Epic 14 | Ações em Lote | 📋 Planejado | 🟡 Média |
+| Epic 15 | Dashboard — Card "A Pagar Hoje" | �📋 Planejado | 🟢 Média |
+| Epic 16 | Relatórios | 📋 Planejado | 🟢 Alta |
 
-### O que será implementado:
-- 📋 **BaseModel** — campo `deleted_at TIMESTAMP NULL` herdado por todas as entidades
-- 📋 **BaseRepository** — método `soft_delete()`, filtro automático `deleted_at IS NULL` em todos os selects
-- 📋 **Repositories especializados** — todos os `get_by_*` ganham filtro `deleted_at IS NULL`
-- 📋 **Services** — validação 409 ao deletar entidades pai com bills ativas
-- 📋 **Migration Alembic** — adicionar coluna + índices + remover UNIQUEs de nome/placa
-- 📋 **Frontend** — tratamento de erro 409 nos hooks de delete
+---
 
-### Entidades afetadas: `branches`, `vendors`, `categories`, `vehicles`, `bills`
+## ✅ Epic 8: Soft Delete em Todas as Entidades (CONCLUÍDO)
+
+**Status:** ✅ **DONE** — Concluído em 24/03/2026
+**Documentação:** `docs/EPIC-4-COMPLETE.md`
+
+### O que foi implementado:
+
+- ✅ **BaseModel** — campo `deleted_at TIMESTAMP NULL` herdado por todas as entidades
+- ✅ **BaseRepository** — método `soft_delete()`, filtro automático `deleted_at IS NULL` em todos os selects
+- ✅ **Repositories especializados** — todos os `get_by_*` ganham filtro `deleted_at IS NULL`
+- ✅ **Services** — validação 409 ao deletar entidades pai com bills ativas
+- ✅ **Migration Alembic** — coluna `deleted_at` adicionada + índices
+- ✅ **Hotfix** — migration `e2f3a4b5c6d7` corrigiu `bill_attachments.deleted_at` faltando
+- ✅ **Frontend** — tratamento de erro 409 nos hooks de delete
+
+### Entidades afetadas: `branches`, `vendors`, `categories`, `vehicles`, `bills`, `bill_attachments`
+
+---
+
+## 📋 Epic 9: Correção de Fuso Horário (PLANEJADO — 🔴 CRÍTICO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-9-TIMEZONE-BUG.md`
+**Prioridade:** 🔴 Crítica — afeta todos os dados em produção
+
+### Problema:
+Datas cadastradas no sistema exibem 1 dia a menos (ex: cadastra dia 10, aparece dia 9). Causa: frontend envia ISO UTC meia-noite, PostgreSQL armazena UTC, e ao exibir em BRT (UTC-3) o dia aparece como o anterior.
+
+### O que será feito:
+
+- 🔲 **Frontend** — enviar data como string `YYYY-MM-DD` (sem conversão UTC)
+- 🔲 **Backend** — campos `due_date`, `paid_at` como `date` (não `datetime`)
+- 🔲 **Schema** — `BillCreate.due_date: date`, validators de timezone removidos
+- 🔲 **Script opcional** — correção de datas já armazenadas com offset errado
+
+---
+
+## 📋 Epic 10: Filtros de Data em Contas a Pagar (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-10-DATE-FILTERS.md`
+**Prioridade:** 🟡 Alta
+
+### O que será feito:
+
+- 🔲 **F1** — DatePicker: filtrar contas por `due_date` específica
+- 🔲 **F2** — MonthPicker: filtrar por mês/ano (range do mês inteiro)
+- 🔲 **F3** — Ordenação: padrão `due_date ASC` + botão toggle ASC/DESC
+- 🔲 **UI** — barra de filtros unificada: `[Status] [Categoria] [Fornecedor] [Filial] [Data] [Mês] [Limpar]`
+
+---
+
+## 📋 Epic 11: Meios de Pagamento — CRUD (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-11-PAYMENT-METHODS.md`
+**Prioridade:** 🟡 Alta (pré-requisito do Epic 14)
+
+### O que será feito:
+
+- 🔲 **Backend** — nova entidade `PaymentMethod` (id, name, is_active)
+- 🔲 **Backend** — tabela `payment_methods` + 10 bancos iniciais via migration seed
+- 🔲 **Backend** — CRUD `/api/v1/payment-methods`
+- 🔲 **Frontend** — página `/settings/payment-methods`
+- � **Frontend** — campo `payment_bank` substituído por `Select` vinculado ao CRUD
+
+---
+
+## 📋 Epic 12: Recorrência com Datas Manuais (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-12-MANUAL-RECURRENCE.md`
+**Prioridade:** 🟡 Média
+
+### O que será feito:
+
+- 🔲 **Backend** — novo campo `recurrence_dates: list[date]` em `BillCreate`
+- 🔲 **Backend** — novo modo de recorrência "manual" (intervalos irregulares)
+- 🔲 **Frontend** — `BillForm`: lista dinâmica de DatePickers (mín. 2)
+- 🔲 **Frontend** — preview das datas antes de salvar
+
+---
+
+## 📋 Epic 13: Edição em Massa de Recorrência (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-13-RECURRENCE-EDIT.md`
+**Prioridade:** 🟡 Alta
+
+### O que será feito:
+
+- 🔲 **Backend** — endpoint `PUT /api/v1/bills/{id}/recurrence` com campo `scope`
+- 🔲 **Backend** — scopes: `only_this` / `this_and_next` / `all`
+- 🔲 **Backend** — propagação de campos sem sobrescrever contas pagas/canceladas
+- 🔲 **Frontend** — modal de confirmação ao editar conta recorrente
+- 🔲 **Frontend** — lógica de recalcular datas ao alterar data numa ocorrência
+
+---
+
+## 📋 Epic 14: Ações em Lote (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-14-BATCH-ACTIONS.md`
+**Prioridade:** 🟡 Média (depende do Epic 11)
+
+### O que será feito:
+
+- 🔲 **Backend** — `POST /api/v1/bills/batch-delete`
+- 🔲 **Backend** — `POST /api/v1/bills/batch-mark-paid`
+- 🔲 **Frontend** — checkboxes na tabela de contas (`rowSelection` AntD)
+- 🔲 **Frontend** — barra contextual: `[Marcar como pagas] [Excluir] [Cancelar seleção]`
+
+---
+
+## 📋 Epic 15: Dashboard — Card "A Pagar Hoje" (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-15-DASHBOARD-DUE-TODAY.md`
+**Prioridade:** 🟢 Média (depende do Epic 9)
+
+### O que será feito:
+
+- 🔲 **Backend** — `GET /api/v1/bills/summary/due-today` retorna `{ count, total_amount, overdue_count, overdue_amount }`
+- 🔲 **Frontend** — novo card no Dashboard com cor dinâmica (🔴 atrasado / 🟡 hoje / 🟢 zero)
+- 🔲 **Frontend** — card com link "Ver contas" que abre filtro correspondente
+
+---
+
+## 📋 Epic 16: Relatórios (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO**
+**Documentação:** `docs/EPIC-16-REPORTS.md`
+**Prioridade:** 🟢 Alta
+
+### O que será feito:
+
+- 🔲 **Backend** — `GET /api/v1/bills/report` com filtros: período, mês, filial, fornecedor, categoria, veículo, status, meio de pagamento
+- 🔲 **Backend** — `BillRepository.get_for_report(filters)` com joins otimizados
+- 🔲 **Frontend** — nova página `/reports` com multi-filtros
+- 🔲 **Frontend** — painel de resumo: total, total pago, total pendente, quantidade
+- 🔲 **Frontend** — exportação CSV (client-side blob)
 
 ---
 

@@ -41,9 +41,41 @@
 - **Arquivo:** `EPIC-7-VEHICLES.md`
 - **Status:** ✅ Completo — 06/03/2026
 
-### 📋 ÉPICO 8: Soft Delete em Todas as Entidades
-- **Arquivo:** `EPIC-8-SOFT-DELETE-PLANNING.md`
-- **Status:** 📋 Planejado — aguardando implementação
+### ✅ ÉPICO 8: Soft Delete em Todas as Entidades
+- **Arquivo:** `EPIC-4-COMPLETE.md` (referência)
+- **Status:** ✅ Completo — 24/03/2026 (+ hotfix `e2f3a4b5c6d7`)
+
+### 📋 ÉPICO 9: Correção de Fuso Horário — Bug -1 Dia
+- **Arquivo:** `EPIC-9-TIMEZONE-BUG.md`
+- **Status:** 📋 Planejado — 🔴 Crítico
+
+### 📋 ÉPICO 10: Filtros de Data em Contas a Pagar
+- **Arquivo:** `EPIC-10-DATE-FILTERS.md`
+- **Status:** 📋 Planejado — 🟡 Alta
+
+### 📋 ÉPICO 11: Meios de Pagamento — CRUD
+- **Arquivo:** `EPIC-11-PAYMENT-METHODS.md`
+- **Status:** 📋 Planejado — 🟡 Alta
+
+### 📋 ÉPICO 12: Recorrência com Datas Manuais
+- **Arquivo:** `EPIC-12-MANUAL-RECURRENCE.md`
+- **Status:** 📋 Planejado — 🟡 Média
+
+### 📋 ÉPICO 13: Edição em Massa de Recorrência
+- **Arquivo:** `EPIC-13-RECURRENCE-EDIT.md`
+- **Status:** 📋 Planejado — 🟡 Alta
+
+### 📋 ÉPICO 14: Ações em Lote (Batch Actions)
+- **Arquivo:** `EPIC-14-BATCH-ACTIONS.md`
+- **Status:** 📋 Planejado — 🟡 Média
+
+### 📋 ÉPICO 15: Dashboard — Card "A Pagar Hoje"
+- **Arquivo:** `EPIC-15-DASHBOARD-DUE-TODAY.md`
+- **Status:** 📋 Planejado — 🟢 Média
+
+### 📋 ÉPICO 16: Relatórios
+- **Arquivo:** `EPIC-16-REPORTS.md`
+- **Status:** 📋 Planejado — 🟢 Alta
 
 ---
 

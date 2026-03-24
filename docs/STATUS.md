@@ -1,10 +1,194 @@
-# 📊 Status Projeto - Épicos 1, 2, 3, 4, 5, 6 e Feature Recorrência
+# 📊 Status Projeto — Épicos 1–16
 
-> **Última Atualização:** 01 de Março de 2026
+> **Última Atualização:** 24 de Março de 2026
 
 ---
 
-## ✅ ÉPICO 6 - Funcionalidades Avançadas (COMPLETO)
+## ✅ ÉPICO 8 — Soft Delete em Todas as Entidades (COMPLETO)
+
+> **Documentação:** `docs/EPIC-4-COMPLETE.md`
+> **Concluído em:** 24/03/2026
+
+### Backend
+
+- [x] `BaseModel` — campo `deleted_at TIMESTAMP NULL` adicionado
+- [x] `BaseRepository` — `soft_delete()` + filtro automático `deleted_at IS NULL`
+- [x] Todos os repositories especializados com filtro `deleted_at IS NULL`
+- [x] Services — validação 409 ao deletar entidade pai com bills ativas
+- [x] Migration `bd8ab0f9fcbf` — `deleted_at` em todas as tabelas principais
+- [x] Hotfix migration `e2f3a4b5c6d7` — `deleted_at` faltando em `bill_attachments`
+
+### Frontend
+
+- [x] Hooks de delete tratam erro 409 com mensagem amigável
+
+**Status: ✅ CONCLUÍDO**
+
+---
+
+## ✅ ÉPICO 7 — Controle de Frota de Veículos (COMPLETO)
+
+> **Documentação:** `docs/EPIC-7-VEHICLES.md` (se criado)
+> **Concluído em:** 06/03/2026
+
+### Backend
+
+- [x] Tabela `vehicles` (placa, marca, modelo, ano, filial, obs)
+- [x] FK `vehicle_id` nullable em `bills`
+- [x] CRUD `/api/v1/vehicles` + endpoint aninhado `/{id}/bills`
+- [x] Migration `0f1f3b804c93` aplicada
+
+### Frontend
+
+- [x] `VehiclesPage` com CRUD completo + modal detalhes (Tabs: Contas / Informações)
+- [x] `BillForm` com campo Veículo opcional
+- [x] Menu lateral com item "Veículos" e rota `/vehicles`
+
+**Status: ✅ CONCLUÍDO**
+
+---
+
+## 📋 ÉPICO 9 — Correção de Fuso Horário / Bug -1 dia (PLANEJADO — 🔴 CRÍTICO)
+
+> **Documentação:** `docs/EPIC-9-TIMEZONE-BUG.md`
+> **Prioridade:** 🔴 Crítica — afeta todos os dados de produção
+
+### Backend
+
+- [ ] Schemas `due_date` / `paid_at` como `date` (não `datetime`)
+- [ ] Remover conversões de timezone nos validators
+- [ ] Script de correção de datas já armazenadas com offset errado
+
+### Frontend
+
+- [ ] Enviar data como string `YYYY-MM-DD` sem conversão UTC
+- [ ] Exibir datas sem ajuste de timezone
+
+---
+
+## 📋 ÉPICO 10 — Filtros de Data em Contas a Pagar (PLANEJADO)
+
+> **Documentação:** `docs/EPIC-10-DATE-FILTERS.md`
+> **Prioridade:** 🟡 Alta
+
+### Frontend
+
+- [ ] DatePicker: filtrar por `due_date` específica
+- [ ] MonthPicker: filtrar por mês/ano
+- [ ] Toggle de ordenação ASC/DESC por `due_date`
+- [ ] Barra de filtros unificada atualizada
+
+---
+
+## 📋 ÉPICO 11 — Meios de Pagamento CRUD (PLANEJADO)
+
+> **Documentação:** `docs/EPIC-11-PAYMENT-METHODS.md`
+> **Prioridade:** 🟡 Alta (pré-requisito do Epic 14)
+
+### Backend
+
+- [ ] Model `PaymentMethod` (id, name, is_active, timestamps)
+- [ ] Tabela `payment_methods` + seed com 10 bancos iniciais
+- [ ] CRUD `/api/v1/payment-methods`
+- [ ] Migration Alembic
+
+### Frontend
+
+- [ ] Página `/settings/payment-methods` com CRUD
+- [ ] Campo `payment_bank` substituído por Select vinculado ao CRUD
+- [ ] Hook `usePaymentMethods`
+
+---
+
+## 📋 ÉPICO 12 — Recorrência com Datas Manuais (PLANEJADO)
+
+> **Documentação:** `docs/EPIC-12-MANUAL-RECURRENCE.md`
+> **Prioridade:** 🟡 Média
+
+### Backend
+
+- [ ] Campo `recurrence_dates: list[date]` em `BillCreate`
+- [ ] Service — modo "manual": cria uma conta por data fornecida
+- [ ] Migration para suportar o novo modo
+
+### Frontend
+
+- [ ] `BillForm`: lista dinâmica de DatePickers (mín. 2)
+- [ ] Preview das datas antes de salvar
+
+---
+
+## 📋 ÉPICO 13 — Edição em Massa de Recorrência (PLANEJADO)
+
+> **Documentação:** `docs/EPIC-13-RECURRENCE-EDIT.md`
+> **Prioridade:** 🟡 Alta
+
+### Backend
+
+- [ ] `PUT /api/v1/bills/{id}/recurrence` com campo `scope`
+- [ ] Scopes: `only_this` / `this_and_next` / `all`
+- [ ] Propagação sem sobrescrever contas pagas/canceladas
+- [ ] Recálculo de datas ao alterar data numa ocorrência
+
+### Frontend
+
+- [ ] Modal de confirmação: "Somente esta / Esta e as próximas / Todas"
+- [ ] Lógica de propagação no hook `useEditRecurringBill`
+
+---
+
+## 📋 ÉPICO 14 — Ações em Lote (PLANEJADO)
+
+> **Documentação:** `docs/EPIC-14-BATCH-ACTIONS.md`
+> **Prioridade:** 🟡 Média (depende do Epic 11)
+
+### Backend
+
+- [ ] `POST /api/v1/bills/batch-delete` — `{ ids: [...] }`
+- [ ] `POST /api/v1/bills/batch-mark-paid` — `{ ids, payment_method_id, paid_at }`
+
+### Frontend
+
+- [ ] Checkboxes na tabela AntD (`rowSelection`)
+- [ ] Barra contextual: `[Marcar como pagas] [Excluir] [Cancelar seleção]`
+
+---
+
+## 📋 ÉPICO 15 — Dashboard "A Pagar Hoje" (PLANEJADO)
+
+> **Documentação:** `docs/EPIC-15-DASHBOARD-DUE-TODAY.md`
+> **Prioridade:** 🟢 Média (depende do Epic 9)
+
+### Backend
+
+- [ ] `GET /api/v1/bills/summary/due-today` retorna `{ count, total_amount, overdue_count, overdue_amount }`
+- [ ] Suporte a filtro `branch_id` opcional
+
+### Frontend
+
+- [ ] Novo card no Dashboard com cor dinâmica (🔴/🟡/🟢)
+- [ ] Link "Ver contas" que aplica filtro correspondente
+
+---
+
+## 📋 ÉPICO 16 — Relatórios (PLANEJADO)
+
+> **Documentação:** `docs/EPIC-16-REPORTS.md`
+> **Prioridade:** 🟢 Alta
+
+### Backend
+
+- [ ] `GET /api/v1/bills/report` com todos os filtros
+- [ ] `BillRepository.get_for_report(filters)` com joins
+- [ ] Suporte a paginação e ordenação
+
+### Frontend
+
+- [ ] Nova página `/reports` com multi-filtros
+- [ ] Painel de resumo (total, pago, pendente, quantidade)
+- [ ] Exportação CSV client-side
+
+---
 
 > **Documentação completa:** `docs/EPIC-6-PLANNING.md`  
 > **Concluído em:** 01/03/2026
