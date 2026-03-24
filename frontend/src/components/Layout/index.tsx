@@ -8,6 +8,7 @@ import {
   FileTextOutlined,
   CarOutlined,
   CreditCardOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
 import { BranchSelector } from '../BranchSelector';
 import * as S from './styles';
@@ -20,6 +21,7 @@ interface LayoutProps {
 const menuItems = [
   { path: '/', label: 'Dashboard', icon: <DashboardOutlined /> },
   { path: '/bills', label: 'Contas a Pagar', icon: <FileTextOutlined /> },
+  { path: '/reports', label: 'Relatórios', icon: <BarChartOutlined /> },
   { path: '/branches', label: 'Filiais', icon: <BankOutlined /> },
   { path: '/vendors', label: 'Fornecedores', icon: <ShopOutlined /> },
   { path: '/categories', label: 'Categorias', icon: <TagsOutlined /> },
