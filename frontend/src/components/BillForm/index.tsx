@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, message, Checkbox, Row, Col, Alert, Radio, Divider } from 'antd';
-import { PaperClipOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Form, Input, InputNumber, Select, DatePicker, Button, message, Checkbox, Row, Col, Alert, Radio, Divider, Modal, Space } from 'antd';
+import { PaperClipOutlined, PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { useCreateBill, useUpdateBill, useBranches, useVendors, useCategories, useVehicles } from '../../hooks';
+import { useCreateBill, useUpdateBill, useUpdateBillRecurrence, useBranches, useVendors, useCategories, useVehicles } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
@@ -25,7 +26,7 @@ const billSchema = z.object({
   notes: z.string().optional().nullable().or(z.literal('')),
   status: z.nativeEnum(BillStatus).optional(),
   is_recurring: z.boolean().optional().default(false),
-  recurrence_type: z.enum(['interval', 'fixed_day']).optional().default('interval'),
+  recurrence_type: z.enum(['interval', 'fixed_day', 'manual_dates']).optional().default('interval'),
   recurrence_interval_days: z.number().min(1).nullable().optional(),
   recurrence_occurrences: z.number().min(2).max(60).nullable().optional(),
   recurrence_day_of_month: z.number().min(1).max(28).nullable().optional(),
@@ -44,13 +45,22 @@ interface BillFormProps {
 export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormProps): React.ReactElement {
   const { mutate: createBill, isPending: isCreating } = useCreateBill();
   const { mutate: updateBill, isPending: isUpdating } = useUpdateBill();
+  const { mutate: updateRecurrence, isPending: isUpdatingRecurrence } = useUpdateBillRecurrence();
   const { data: branches } = useBranches();
   const { data: vendors } = useVendors();
   const { data: categories } = useCategories();
   const { data: vehicles } = useVehicles();
   const { currentBranch } = useBranchStore();
-  
-  const isLoading = isCreating || isUpdating;
+
+  // Epic 12: manual dates state
+  const [manualDates, setManualDates] = useState<Dayjs[]>([dayjs(), dayjs().add(1, 'month')]);
+
+  // Epic 13: scope modal state
+  const [scopeModalOpen, setScopeModalOpen] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<BillFormData | null>(null);
+  const [selectedScope, setSelectedScope] = useState<'this' | 'this_and_next' | 'all'>('this');
+
+  const isLoading = isCreating || isUpdating || isUpdatingRecurrence;
   const isEditing = !!bill;
 
   const {
@@ -105,17 +115,37 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
   }, [bill, currentBranch, reset, setValue]);
 
   const onSubmit = (data: BillFormData) => {
+    // Epic 13: if editing a recurring bill, show scope modal
+    if (isEditing && bill?.recurrence_group_id) {
+      setPendingFormData(data);
+      setSelectedScope('this');
+      setScopeModalOpen(true);
+      return;
+    }
+    submitBill(data);
+  };
+
+  const submitBill = (data: BillFormData) => {
     const useFixedDay = data.is_recurring && data.recurrence_type === 'fixed_day';
-    const payload = {
+    const useManualDates = data.is_recurring && data.recurrence_type === 'manual_dates';
+
+    const payload: any = {
       ...data,
       invoice_number: data.invoice_number || null,
       notes: data.notes || null,
       is_recurring: data.is_recurring || false,
-      recurrence_interval_days: (!useFixedDay && data.is_recurring) ? data.recurrence_interval_days : null,
-      recurrence_occurrences: data.is_recurring ? data.recurrence_occurrences : null,
-      recurrence_day_of_month: (useFixedDay) ? data.recurrence_day_of_month : null,
+      recurrence_interval_days: (!useFixedDay && !useManualDates && data.is_recurring) ? data.recurrence_interval_days : null,
+      recurrence_occurrences: (data.is_recurring && !useManualDates) ? data.recurrence_occurrences : null,
+      recurrence_day_of_month: useFixedDay ? data.recurrence_day_of_month : null,
       vehicle_id: data.vehicle_id || null,
     };
+
+    if (useManualDates) {
+      payload.recurrence_dates = manualDates.map(d => d.format('YYYY-MM-DD'));
+      delete payload.recurrence_interval_days;
+      delete payload.recurrence_day_of_month;
+      delete payload.recurrence_occurrences;
+    }
 
     if (isEditing && bill) {
       updateBill(
@@ -144,6 +174,37 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
     }
   };
 
+  // Epic 13: confirm scope and call recurrence update endpoint
+  const handleScopeConfirm = () => {
+    if (!bill || !pendingFormData) return;
+    updateRecurrence(
+      {
+        id: bill.id,
+        data: {
+          scope: selectedScope,
+          description: pendingFormData.description,
+          amount: pendingFormData.amount,
+          due_date: pendingFormData.due_date,
+          notes: pendingFormData.notes || null,
+          vendor_id: pendingFormData.vendor_id,
+          category_id: pendingFormData.category_id,
+          vehicle_id: pendingFormData.vehicle_id ?? null,
+        },
+      },
+      {
+        onSuccess: () => {
+          message.success('Conta(s) recorrente(s) atualizada(s)!');
+          setScopeModalOpen(false);
+          setPendingFormData(null);
+          onSuccess?.();
+        },
+        onError: () => {
+          message.error('Erro ao atualizar recorrência');
+        },
+      }
+    );
+  };
+
   const statusOptions = [
     { value: BillStatus.PENDING, label: 'Pendente' },
     { value: BillStatus.APPROVED, label: 'Aprovada' },
@@ -152,6 +213,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
   ];
 
   return (
+    <>
     <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
       <Form.Item
         label="Filial"
@@ -373,95 +435,140 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
                     <Radio.Group {...field}>
                       <Radio value="interval">Intervalo em dias</Radio>
                       <Radio value="fixed_day">Dia fixo do mês</Radio>
+                      <Radio value="manual_dates">Datas manuais</Radio>
                     </Radio.Group>
                   )}
                 />
               </Form.Item>
 
-              <Row gutter={16}>
-                {recurrenceType === 'interval' ? (
-                  <Col span={12}>
-                    <Form.Item
-                      label="Intervalo (dias)"
-                      validateStatus={errors.recurrence_interval_days ? 'error' : ''}
-                      help={errors.recurrence_interval_days?.message}
-                    >
-                      <Controller
-                        name="recurrence_interval_days"
-                        control={control}
-                        render={({ field }) => (
-                          <InputNumber
-                            {...field}
-                            min={1}
-                            max={365}
-                            placeholder="Ex: 30"
-                            style={{ width: '100%' }}
-                            value={field.value ?? undefined}
-                          />
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                ) : (
-                  <Col span={12}>
-                    <Form.Item
-                      label="Dia do mês (1–28)"
-                      validateStatus={errors.recurrence_day_of_month ? 'error' : ''}
-                      help={errors.recurrence_day_of_month?.message}
-                    >
-                      <Controller
-                        name="recurrence_day_of_month"
-                        control={control}
-                        render={({ field }) => (
-                          <InputNumber
-                            {...field}
-                            min={1}
-                            max={28}
-                            placeholder="Ex: 10"
-                            style={{ width: '100%' }}
-                            value={field.value ?? undefined}
-                          />
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                )}
-                <Col span={12}>
-                  <Form.Item
-                    label="Número de Ocorrências"
-                    validateStatus={errors.recurrence_occurrences ? 'error' : ''}
-                    help={errors.recurrence_occurrences?.message}
-                  >
-                    <Controller
-                      name="recurrence_occurrences"
-                      control={control}
-                      render={({ field }) => (
-                        <InputNumber
-                          {...field}
-                          min={2}
-                          max={60}
-                          placeholder="Ex: 12"
-                          style={{ width: '100%' }}
-                          value={field.value ?? undefined}
+              {recurrenceType === 'manual_dates' ? (
+                <>
+                  <Form.Item label="Datas de Vencimento">
+                    {manualDates.map((date, idx) => (
+                      <Space key={idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                        <DatePicker
+                          format="DD/MM/YYYY"
+                          value={date}
+                          onChange={(d) => {
+                            if (d) {
+                              const next = [...manualDates];
+                              next[idx] = d;
+                              setManualDates(next);
+                            }
+                          }}
+                          placeholder="Selecione a data"
                         />
-                      )}
-                    />
+                        {manualDates.length > 2 && (
+                          <MinusCircleOutlined
+                            style={{ color: '#ff4d4f', cursor: 'pointer' }}
+                            onClick={() => setManualDates(manualDates.filter((_, i) => i !== idx))}
+                          />
+                        )}
+                      </Space>
+                    ))}
+                    <Button
+                      type="dashed"
+                      onClick={() => setManualDates([...manualDates, dayjs().add(manualDates.length, 'month')])}
+                      icon={<PlusOutlined />}
+                      style={{ width: 200 }}
+                    >
+                      Adicionar data
+                    </Button>
                   </Form.Item>
-                </Col>
-              </Row>
-              <Alert
-                type="info"
-                showIcon
-                message={
-                  recurrenceType === 'fixed_day'
-                    ? occurrences && dayOfMonth
-                      ? `Serão criadas ${occurrences} contas, todo dia ${dayOfMonth} de cada mês`
-                      : 'Preencha o dia do mês e o número de ocorrências'
-                    : occurrences && intervalDays
-                    ? `Serão criadas ${occurrences} contas, a cada ${intervalDays} dia(s) a partir da data de vencimento`
-                    : 'Preencha o intervalo e o número de ocorrências'
-                }
-              />
+                  <Alert
+                    type="info"
+                    showIcon
+                    message={`Serão criadas ${manualDates.length} parcelas nas datas selecionadas`}
+                  />
+                </>
+              ) : (
+                <Row gutter={16}>
+                  {recurrenceType === 'interval' ? (
+                    <Col span={12}>
+                      <Form.Item
+                        label="Intervalo (dias)"
+                        validateStatus={errors.recurrence_interval_days ? 'error' : ''}
+                        help={errors.recurrence_interval_days?.message}
+                      >
+                        <Controller
+                          name="recurrence_interval_days"
+                          control={control}
+                          render={({ field }) => (
+                            <InputNumber
+                              {...field}
+                              min={1}
+                              max={365}
+                              placeholder="Ex: 30"
+                              style={{ width: '100%' }}
+                              value={field.value ?? undefined}
+                            />
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  ) : (
+                    <Col span={12}>
+                      <Form.Item
+                        label="Dia do mês (1–28)"
+                        validateStatus={errors.recurrence_day_of_month ? 'error' : ''}
+                        help={errors.recurrence_day_of_month?.message}
+                      >
+                        <Controller
+                          name="recurrence_day_of_month"
+                          control={control}
+                          render={({ field }) => (
+                            <InputNumber
+                              {...field}
+                              min={1}
+                              max={28}
+                              placeholder="Ex: 10"
+                              style={{ width: '100%' }}
+                              value={field.value ?? undefined}
+                            />
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  )}
+                  <Col span={12}>
+                    <Form.Item
+                      label="Número de Ocorrências"
+                      validateStatus={errors.recurrence_occurrences ? 'error' : ''}
+                      help={errors.recurrence_occurrences?.message}
+                    >
+                      <Controller
+                        name="recurrence_occurrences"
+                        control={control}
+                        render={({ field }) => (
+                          <InputNumber
+                            {...field}
+                            min={2}
+                            max={60}
+                            placeholder="Ex: 12"
+                            style={{ width: '100%' }}
+                            value={field.value ?? undefined}
+                          />
+                        )}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              )}
+              {recurrenceType !== 'manual_dates' && (
+                <Alert
+                  type="info"
+                  showIcon
+                  message={
+                    recurrenceType === 'fixed_day'
+                      ? occurrences && dayOfMonth
+                        ? `Serão criadas ${occurrences} contas, todo dia ${dayOfMonth} de cada mês`
+                        : 'Preencha o dia do mês e o número de ocorrências'
+                      : occurrences && intervalDays
+                      ? `Serão criadas ${occurrences} contas, a cada ${intervalDays} dia(s) a partir da data de vencimento`
+                      : 'Preencha o intervalo e o número de ocorrências'
+                  }
+                />
+              )}
             </div>
           )}
         </>
@@ -487,6 +594,29 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
         )}
       </Form.Item>
     </Form>
+
+    {/* Epic 13: Scope modal for recurring bill edits */}
+    <Modal
+      title="Editar conta recorrente"
+      open={scopeModalOpen}
+      onOk={handleScopeConfirm}
+      onCancel={() => { setScopeModalOpen(false); setPendingFormData(null); }}
+      okText="Confirmar"
+      cancelText="Cancelar"
+      confirmLoading={isUpdatingRecurrence}
+    >
+      <p style={{ marginBottom: 16 }}>Esta conta faz parte de uma série recorrente. Como deseja aplicar as alterações?</p>
+      <Radio.Group
+        value={selectedScope}
+        onChange={(e) => setSelectedScope(e.target.value)}
+        style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+      >
+        <Radio value="this">Somente esta conta</Radio>
+        <Radio value="this_and_next">Esta e as próximas parcelas</Radio>
+        <Radio value="all">Todas as parcelas da série</Radio>
+      </Radio.Group>
+    </Modal>
+  </>
   );
 }
 

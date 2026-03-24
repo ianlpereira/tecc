@@ -25,6 +25,13 @@ import type {
   PaymentMethod,
   PaymentMethodCreate,
   PaymentMethodUpdate,
+  BillRecurrenceUpdate,
+  BatchDeleteRequest,
+  BatchMarkPaidRequest,
+  BatchDeleteResponse,
+  BatchMarkPaidResponse,
+  DueTodaySummary,
+  BillReportResponse,
 } from '../types';
 
 const API_PREFIX = '/api/v1';
@@ -171,6 +178,33 @@ export const billApi = {
 
   markAsPaid: async (id: number, payload?: MarkPaidPayload): Promise<Bill> => {
     const response = await apiClient.post(`${API_PREFIX}/bills/${id}/mark-paid`, payload ?? {});
+    return response.data;
+  },
+
+  updateRecurrence: async (id: number, data: BillRecurrenceUpdate): Promise<{ updated: number }> => {
+    const response = await apiClient.put(`${API_PREFIX}/bills/${id}/recurrence`, data);
+    return response.data;
+  },
+
+  batchDelete: async (data: BatchDeleteRequest): Promise<BatchDeleteResponse> => {
+    const response = await apiClient.post(`${API_PREFIX}/bills/batch-delete`, data);
+    return response.data;
+  },
+
+  batchMarkPaid: async (data: BatchMarkPaidRequest): Promise<BatchMarkPaidResponse> => {
+    const response = await apiClient.post(`${API_PREFIX}/bills/batch-mark-paid`, data);
+    return response.data;
+  },
+
+  getDueTodaySummary: async (branchId?: number): Promise<DueTodaySummary> => {
+    const params: Record<string, any> = {};
+    if (branchId) params.branch_id = branchId;
+    const response = await apiClient.get(`${API_PREFIX}/bills/summary/due-today`, { params });
+    return response.data;
+  },
+
+  getReport: async (filters: Record<string, any>): Promise<BillReportResponse> => {
+    const response = await apiClient.get(`${API_PREFIX}/bills/report`, { params: filters });
     return response.data;
   },
 };

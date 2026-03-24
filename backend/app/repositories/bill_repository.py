@@ -3,8 +3,10 @@ Bill repository for CRUD operations on bills.
 """
 
 from typing import List, Optional
+from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_
+from sqlalchemy.orm import joinedload
 from app.models import Bill, BillStatus
 from app.repositories.base import BaseRepository
 
@@ -100,3 +102,84 @@ class BillRepository(BaseRepository[Bill]):
             )
         )
         return result.scalars().all()
+
+    async def get_for_report(
+        self,
+        date_from: date = None,
+        date_to: date = None,
+        month: str = None,
+        branch_ids: list = None,
+        vendor_ids: list = None,
+        category_ids: list = None,
+        vehicle_ids: list = None,
+        statuses: list = None,
+        payment_banks: list = None,
+    ) -> list:
+        """Get bills for the reports page with joined vendor/category/branch/vehicle names."""
+        from app.models.vendor import Vendor
+        from app.models.category import Category
+        from app.models.branch import Branch
+        from app.models.vehicle import Vehicle
+
+        stmt = (
+            select(
+                Bill,
+                Vendor.name.label("vendor_name"),
+                Category.name.label("category_name"),
+                Branch.name.label("branch_name"),
+                Vehicle.plate.label("vehicle_plate"),
+            )
+            .outerjoin(Vendor, Bill.vendor_id == Vendor.id)
+            .outerjoin(Category, Bill.category_id == Category.id)
+            .outerjoin(Branch, Bill.branch_id == Branch.id)
+            .outerjoin(Vehicle, Bill.vehicle_id == Vehicle.id)
+            .where(Bill.deleted_at == None)  # noqa: E711
+        )
+
+        if date_from:
+            stmt = stmt.where(Bill.due_date >= date_from)
+        if date_to:
+            stmt = stmt.where(Bill.due_date <= date_to)
+        if month:
+            # month format: "YYYY-MM"
+            stmt = stmt.where(
+                Bill.due_date >= date(int(month[:4]), int(month[5:7]), 1)
+            )
+            import calendar
+            last_day = calendar.monthrange(int(month[:4]), int(month[5:7]))[1]
+            stmt = stmt.where(
+                Bill.due_date <= date(int(month[:4]), int(month[5:7]), last_day)
+            )
+        if branch_ids:
+            stmt = stmt.where(Bill.branch_id.in_(branch_ids))
+        if vendor_ids:
+            stmt = stmt.where(Bill.vendor_id.in_(vendor_ids))
+        if category_ids:
+            stmt = stmt.where(Bill.category_id.in_(category_ids))
+        if vehicle_ids:
+            stmt = stmt.where(Bill.vehicle_id.in_(vehicle_ids))
+        if statuses:
+            stmt = stmt.where(Bill.status.in_(statuses))
+        if payment_banks:
+            stmt = stmt.where(Bill.payment_bank.in_(payment_banks))
+
+        stmt = stmt.order_by(Bill.due_date, Bill.id)
+        result = await self.db.execute(stmt)
+        rows = result.all()
+
+        return [
+            {
+                "id": row.Bill.id,
+                "description": row.Bill.description,
+                "vendor_name": row.vendor_name,
+                "category_name": row.category_name,
+                "branch_name": row.branch_name,
+                "vehicle_plate": row.vehicle_plate,
+                "amount": row.Bill.amount,
+                "due_date": row.Bill.due_date,
+                "status": row.Bill.status,
+                "payment_bank": row.Bill.payment_bank,
+                "paid_at": row.Bill.paid_at,
+            }
+            for row in rows
+        ]

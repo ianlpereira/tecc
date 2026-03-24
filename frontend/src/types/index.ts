@@ -120,6 +120,7 @@ export interface BillCreate {
   recurrence_interval_days?: number | null;
   recurrence_occurrences?: number | null;
   recurrence_day_of_month?: number | null;
+  recurrence_dates?: string[] | null;
   vehicle_id?: number | null;
 }
 
@@ -201,4 +202,73 @@ export interface PaymentMethodCreate {
 export interface PaymentMethodUpdate {
   name?: string;
   is_active?: boolean;
+}
+
+// --- Epic 13: Recurrence update scope ---
+export interface BillRecurrenceUpdate {
+  scope: 'this' | 'this_and_next' | 'all';
+  description?: string;
+  amount?: number;
+  due_date?: string;
+  notes?: string | null;
+  vendor_id?: number;
+  category_id?: number;
+  vehicle_id?: number | null;
+}
+
+// --- Epic 14: Batch operations ---
+export interface BatchDeleteRequest {
+  ids: number[];
+}
+
+export interface BatchMarkPaidRequest {
+  ids: number[];
+  payment_bank?: string | null;
+  paid_at?: string | null;
+}
+
+export interface BatchDeleteResponse {
+  deleted: number;
+}
+
+export interface BatchMarkPaidResponse {
+  updated: number;
+  skipped: number;
+}
+
+// --- Epic 15: Due today summary ---
+export interface DueTodaySummary {
+  count: number;
+  total_amount: number;
+  overdue_count: number;
+  overdue_amount: number;
+  due_today_count: number;
+  due_today_amount: number;
+}
+
+// --- Epic 16: Reports ---
+export interface BillReportRow {
+  id: number;
+  description: string;
+  vendor_name: string | null;
+  category_name: string | null;
+  branch_name: string | null;
+  vehicle_plate: string | null;
+  amount: number;
+  due_date: string;
+  status: BillStatus;
+  payment_bank: string | null;
+  paid_at: string | null;
+}
+
+export interface BillReportSummary {
+  total_amount: number;
+  paid_amount: number;
+  pending_amount: number;
+  count: number;
+}
+
+export interface BillReportResponse {
+  rows: BillReportRow[];
+  summary: BillReportSummary;
 }
