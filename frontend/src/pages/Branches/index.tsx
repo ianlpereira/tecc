@@ -20,8 +20,9 @@ export function BranchesPage(): React.ReactElement {
       onSuccess: () => {
         message.success('Filial excluída com sucesso!');
       },
-      onError: () => {
-        message.error('Erro ao excluir filial');
+      onError: (error: any) => {
+        const detail = error?.response?.data?.detail;
+        message.error(detail || 'Erro ao excluir filial');
       },
     });
   };

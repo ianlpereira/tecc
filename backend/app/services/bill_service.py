@@ -213,12 +213,12 @@ class BillService:
         return await self.repository.get_by_id(bill_id)
 
     async def delete_bill(self, bill_id: int) -> bool:
-        """Delete a bill."""
+        """Soft-delete a bill."""
         bill = await self.repository.get_by_id(bill_id)
         if not bill:
             return False
 
-        await self.repository.delete(bill_id)
+        await self.repository.soft_delete(bill_id)
         await self.repository.commit()
         return True
 

@@ -25,3 +25,9 @@ class BaseModel(Base):
         nullable=False,
         default=datetime.utcnow,
     )
+    deleted_at = Column(
+        DateTime,
+        nullable=True,
+        default=None,
+        index=True,
+    )

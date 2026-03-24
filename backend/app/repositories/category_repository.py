@@ -16,8 +16,11 @@ class CategoryRepository(BaseRepository[Category]):
         super().__init__(db, Category)
 
     async def get_by_name(self, name: str) -> Optional[Category]:
-        """Get category by name."""
+        """Get non-deleted category by name."""
         result = await self.db.execute(
-            select(Category).where(Category.name == name)
+            select(Category).where(
+                Category.name == name,
+                Category.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()

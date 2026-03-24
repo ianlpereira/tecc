@@ -21,8 +21,9 @@ export function VendorsPage(): React.ReactElement {
       onSuccess: () => {
         message.success('Fornecedor excluído com sucesso!');
       },
-      onError: () => {
-        message.error('Erro ao excluir fornecedor');
+      onError: (error: any) => {
+        const detail = error?.response?.data?.detail;
+        message.error(detail || 'Erro ao excluir fornecedor');
       },
     });
   };

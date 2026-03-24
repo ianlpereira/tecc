@@ -20,8 +20,9 @@ export function CategoriesPage(): React.ReactElement {
       onSuccess: () => {
         message.success('Categoria excluída com sucesso!');
       },
-      onError: () => {
-        message.error('Erro ao excluir categoria');
+      onError: (error: any) => {
+        const detail = error?.response?.data?.detail;
+        message.error(detail || 'Erro ao excluir categoria');
       },
     });
   };

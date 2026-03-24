@@ -16,16 +16,22 @@ class VehicleRepository(BaseRepository[Vehicle]):
         super().__init__(db, Vehicle)
 
     async def get_by_branch(self, branch_id: int) -> List[Vehicle]:
-        """Get all vehicles for a branch."""
+        """Get all non-deleted vehicles for a branch."""
         result = await self.db.execute(
-            select(Vehicle).where(Vehicle.branch_id == branch_id)
+            select(Vehicle).where(
+                Vehicle.branch_id == branch_id,
+                Vehicle.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalars().all()
 
     async def get_by_plate(self, plate: str) -> Optional[Vehicle]:
-        """Get vehicle by plate number."""
+        """Get non-deleted vehicle by plate number."""
         result = await self.db.execute(
-            select(Vehicle).where(Vehicle.plate == plate)
+            select(Vehicle).where(
+                Vehicle.plate == plate,
+                Vehicle.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()
 

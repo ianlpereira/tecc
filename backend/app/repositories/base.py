@@ -2,6 +2,7 @@
 Generic repository base class for CRUD operations.
 """
 
+from datetime import datetime
 from typing import Generic, TypeVar, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -17,14 +18,19 @@ class BaseRepository(Generic[T]):
         self.model = model
 
     async def get_all(self) -> List[T]:
-        """Retrieve all records."""
-        result = await self.db.execute(select(self.model))
+        """Retrieve all non-deleted records."""
+        result = await self.db.execute(
+            select(self.model).where(self.model.deleted_at == None)  # noqa: E711
+        )
         return result.scalars().all()
 
     async def get_by_id(self, id: int) -> Optional[T]:
-        """Retrieve a record by ID."""
+        """Retrieve a non-deleted record by ID."""
         result = await self.db.execute(
-            select(self.model).where(self.model.id == id)
+            select(self.model).where(
+                self.model.id == id,
+                self.model.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()
 
@@ -45,8 +51,17 @@ class BaseRepository(Generic[T]):
             await self.db.refresh(db_obj)
         return db_obj
 
-    async def delete(self, id: int) -> bool:
-        """Delete a record by ID."""
+    async def soft_delete(self, id: int) -> bool:
+        """Soft delete — marks record as deleted by setting deleted_at timestamp."""
+        db_obj = await self.get_by_id(id)
+        if db_obj:
+            db_obj.deleted_at = datetime.utcnow()
+            await self.db.flush()
+            return True
+        return False
+
+    async def hard_delete(self, id: int) -> bool:
+        """Hard delete — physically removes record. Use only when strictly necessary."""
         db_obj = await self.get_by_id(id)
         if db_obj:
             await self.db.delete(db_obj)

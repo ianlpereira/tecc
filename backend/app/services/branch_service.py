@@ -5,8 +5,8 @@ Branch service with business logic.
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from app.models import Branch
-from app.repositories import BranchRepository
+from app.models import Branch, BillStatus
+from app.repositories import BranchRepository, BillRepository
 from app.schemas.branch import BranchResponse, BranchWithChildren
 
 
@@ -15,6 +15,7 @@ class BranchService:
 
     def __init__(self, db: AsyncSession):
         self.repository = BranchRepository(db)
+        self.bill_repository = BillRepository(db)
         self.db = db
 
     async def validate_hierarchy(
@@ -147,7 +148,7 @@ class BranchService:
         return await self.repository.get_by_id(branch_id)
 
     async def delete_branch(self, branch_id: int) -> bool:
-        """Delete a branch."""
+        """Soft-delete a branch."""
         branch = await self.repository.get_by_id(branch_id)
         if not branch:
             return False
@@ -167,7 +168,19 @@ class BranchService:
                 detail="Cannot delete branch with children. Remove or reassign children first."
             )
 
-        await self.repository.delete(branch_id)
+        # Check if branch has active bills
+        bills = await self.bill_repository.get_by_branch(branch_id)
+        active_bills = [
+            b for b in bills
+            if b.status not in (BillStatus.PAID, BillStatus.CANCELLED)
+        ]
+        if active_bills:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Existem {len(active_bills)} conta(s) ativa(s) vinculada(s) a esta filial. Cancele ou quite antes de excluir."
+            )
+
+        await self.repository.soft_delete(branch_id)
         await self.repository.commit()
         return True
 
@@ -181,5 +194,6 @@ class BranchService:
             parent_name=branch.parent.name if branch.parent else None,
             children_count=len(branch.children) if hasattr(branch, 'children') else 0,
             created_at=branch.created_at,
-            updated_at=branch.updated_at
+            updated_at=branch.updated_at,
+            deleted_at=branch.deleted_at,
         )

@@ -124,8 +124,9 @@ export function BillsPage(): React.ReactElement {
       onSuccess: () => {
         message.success('Conta excluída com sucesso!');
       },
-      onError: () => {
-        message.error('Erro ao excluir conta');
+      onError: (error: any) => {
+        const detail = error?.response?.data?.detail;
+        message.error(detail || 'Erro ao excluir conta');
       },
     });
   };

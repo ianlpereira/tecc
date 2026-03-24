@@ -4,8 +4,9 @@ Category service with business logic.
 
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Category
-from app.repositories import CategoryRepository
+from fastapi import HTTPException
+from app.models import Category, BillStatus
+from app.repositories import CategoryRepository, BillRepository
 
 
 class CategoryService:
@@ -13,6 +14,7 @@ class CategoryService:
 
     def __init__(self, db: AsyncSession):
         self.repository = CategoryRepository(db)
+        self.bill_repository = BillRepository(db)
         self.db = db
 
     async def get_all_categories(self) -> List[Category]:
@@ -60,11 +62,23 @@ class CategoryService:
         return await self.repository.get_by_id(category_id)
 
     async def delete_category(self, category_id: int) -> bool:
-        """Delete a category."""
+        """Soft-delete a category."""
         category = await self.repository.get_by_id(category_id)
         if not category:
             return False
 
-        await self.repository.delete(category_id)
+        # Check if category has active bills
+        bills = await self.bill_repository.get_by_category(category_id)
+        active_bills = [
+            b for b in bills
+            if b.status not in (BillStatus.PAID, BillStatus.CANCELLED)
+        ]
+        if active_bills:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Existem {len(active_bills)} conta(s) ativa(s) vinculada(s) a esta categoria. Cancele ou quite antes de excluir."
+            )
+
+        await self.repository.soft_delete(category_id)
         await self.repository.commit()
         return True

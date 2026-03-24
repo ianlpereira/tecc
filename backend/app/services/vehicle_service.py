@@ -6,7 +6,9 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.vehicle import Vehicle
+from app.models import BillStatus
 from app.repositories.vehicle_repository import VehicleRepository
+from app.repositories.bill_repository import BillRepository
 
 
 class VehicleService:
@@ -14,6 +16,7 @@ class VehicleService:
 
     def __init__(self, db: AsyncSession):
         self.repository = VehicleRepository(db)
+        self.bill_repository = BillRepository(db)
 
     async def get_all_vehicles(self) -> List[Vehicle]:
         """Get all vehicles."""
@@ -75,11 +78,25 @@ class VehicleService:
         return await self.repository.update(vehicle_id, {k: v for k, v in kwargs.items() if v is not None})
 
     async def delete_vehicle(self, vehicle_id: int) -> None:
-        """Delete a vehicle."""
+        """Soft-delete a vehicle."""
         vehicle = await self.repository.get_by_id(vehicle_id)
         if not vehicle:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Veículo não encontrado.",
             )
-        await self.repository.delete(vehicle_id)
+
+        # Check if vehicle has active bills
+        bills = await self.bill_repository.get_by_vehicle(vehicle_id)
+        active_bills = [
+            b for b in bills
+            if b.status not in (BillStatus.PAID, BillStatus.CANCELLED)
+        ]
+        if active_bills:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Existem {len(active_bills)} conta(s) ativa(s) vinculada(s) a este veículo. Cancele ou quite antes de excluir."
+            )
+
+        await self.repository.soft_delete(vehicle_id)
+        await self.repository.commit()

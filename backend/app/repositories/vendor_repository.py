@@ -16,17 +16,23 @@ class VendorRepository(BaseRepository[Vendor]):
         super().__init__(db, Vendor)
 
     async def get_by_name(self, name: str) -> Optional[Vendor]:
-        """Get vendor by name."""
+        """Get non-deleted vendor by name."""
         result = await self.db.execute(
-            select(Vendor).where(Vendor.name == name)
+            select(Vendor).where(
+                Vendor.name == name,
+                Vendor.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> Optional[Vendor]:
-        """Get vendor by email. Returns None if email is empty or None."""
+        """Get non-deleted vendor by email. Returns None if email is empty or None."""
         if not email or not email.strip():
             return None
         result = await self.db.execute(
-            select(Vendor).where(Vendor.email == email)
+            select(Vendor).where(
+                Vendor.email == email,
+                Vendor.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()

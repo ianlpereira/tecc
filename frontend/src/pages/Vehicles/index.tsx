@@ -230,7 +230,10 @@ export function VehiclesPage(): React.ReactElement {
   const handleDelete = (id: number) => {
     deleteVehicle(id, {
       onSuccess: () => message.success('Veículo excluído!'),
-      onError: () => message.error('Erro ao excluir veículo'),
+      onError: (error: any) => {
+        const detail = error?.response?.data?.detail;
+        message.error(detail || 'Erro ao excluir veículo');
+      },
     });
   };
 

@@ -4,8 +4,9 @@ Vendor service with business logic.
 
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Vendor
-from app.repositories import VendorRepository
+from fastapi import HTTPException
+from app.models import Vendor, BillStatus
+from app.repositories import VendorRepository, BillRepository
 
 
 class VendorService:
@@ -13,6 +14,7 @@ class VendorService:
 
     def __init__(self, db: AsyncSession):
         self.repository = VendorRepository(db)
+        self.bill_repository = BillRepository(db)
         self.db = db
 
     async def get_all_vendors(self) -> List[Vendor]:
@@ -83,11 +85,23 @@ class VendorService:
         return await self.repository.get_by_id(vendor_id)
 
     async def delete_vendor(self, vendor_id: int) -> bool:
-        """Delete a vendor."""
+        """Soft-delete a vendor."""
         vendor = await self.repository.get_by_id(vendor_id)
         if not vendor:
             return False
 
-        await self.repository.delete(vendor_id)
+        # Check if vendor has active bills
+        bills = await self.bill_repository.get_by_vendor(vendor_id)
+        active_bills = [
+            b for b in bills
+            if b.status not in (BillStatus.PAID, BillStatus.CANCELLED)
+        ]
+        if active_bills:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Existem {len(active_bills)} conta(s) ativa(s) vinculada(s) a este fornecedor. Cancele ou quite antes de excluir."
+            )
+
+        await self.repository.soft_delete(vendor_id)
         await self.repository.commit()
         return True

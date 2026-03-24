@@ -17,32 +17,44 @@ class BranchRepository(BaseRepository[Branch]):
         super().__init__(db, Branch)
 
     async def get_by_name(self, name: str) -> Optional[Branch]:
-        """Get branch by name."""
+        """Get non-deleted branch by name."""
         result = await self.db.execute(
-            select(Branch).where(Branch.name == name)
+            select(Branch).where(
+                Branch.name == name,
+                Branch.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()
 
     async def get_headquarters(self) -> Optional[Branch]:
         """Get the headquarters branch."""
         result = await self.db.execute(
-            select(Branch).where(Branch.is_headquarters == True)
+            select(Branch).where(
+                Branch.is_headquarters == True,  # noqa: E712
+                Branch.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()
 
     async def get_with_children(self, branch_id: int) -> Optional[Branch]:
-        """Get branch with all its children loaded."""
+        """Get branch with all its non-deleted children loaded."""
         result = await self.db.execute(
             select(Branch)
             .options(selectinload(Branch.children))
-            .where(Branch.id == branch_id)
+            .where(
+                Branch.id == branch_id,
+                Branch.deleted_at == None,  # noqa: E711
+            )
         )
         return result.scalar_one_or_none()
 
     async def get_children_ids(self, branch_id: int) -> List[int]:
-        """Get all children IDs of a branch."""
+        """Get all non-deleted children IDs of a branch."""
         result = await self.db.execute(
-            select(Branch.id).where(Branch.parent_branch_id == branch_id)
+            select(Branch.id).where(
+                Branch.parent_branch_id == branch_id,
+                Branch.deleted_at == None,  # noqa: E711
+            )
         )
         return list(result.scalars().all())
 
@@ -66,10 +78,11 @@ class BranchRepository(BaseRepository[Branch]):
         return ids
 
     async def get_all_with_hierarchy(self) -> List[Branch]:
-        """Get all branches with parent/children relationships loaded."""
+        """Get all non-deleted branches with parent/children relationships loaded."""
         result = await self.db.execute(
             select(Branch)
             .options(selectinload(Branch.parent))
             .options(selectinload(Branch.children))
+            .where(Branch.deleted_at == None)  # noqa: E711
         )
         return list(result.scalars().all())
