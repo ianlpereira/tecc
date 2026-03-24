@@ -6,6 +6,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.schemas.payment_method import (
     PaymentMethodCreate,
     PaymentMethodUpdate,
@@ -13,7 +14,7 @@ from app.schemas.payment_method import (
 )
 from app.services.payment_method_service import PaymentMethodService
 
-router = APIRouter(prefix="/api/v1/payment-methods", tags=["payment-methods"])
+router = APIRouter(prefix="/api/v1/payment-methods", tags=["payment-methods"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=List[PaymentMethodResponse])

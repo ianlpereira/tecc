@@ -12,6 +12,12 @@ services:
         value: production
       - key: DEBUG
         value: "false"
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: DEFAULT_ADMIN_USERNAME
+        sync: false
+      - key: DEFAULT_ADMIN_PASSWORD
+        sync: false
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     # entrypoint.sh already runs: alembic upgrade head && uvicorn

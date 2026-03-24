@@ -11,6 +11,7 @@ from app.models.bill import Bill, BillStatus
 from app.models.bill_attachment import BillAttachment
 from app.models.vehicle import Vehicle
 from app.models.payment_method import PaymentMethod
+from app.models.user import User, UserRole
 
 __all__ = [
     "Base",
@@ -23,5 +24,7 @@ __all__ = [
     "BillAttachment",
     "Vehicle",
     "PaymentMethod",
+    "User",
+    "UserRole",
 ]
 

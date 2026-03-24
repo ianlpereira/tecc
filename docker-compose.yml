@@ -26,6 +26,9 @@ services:
       DATABASE_URL: postgresql+asyncpg://${DB_USER:-tecc_user}:${DB_PASSWORD:-tecc_password}@db:5432/${DB_NAME:-tecc_db}
       ENVIRONMENT: ${ENVIRONMENT:-development}
       DEBUG: ${DEBUG:-true}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-jwt-secret-change-in-production-please}
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-admin123}
     ports:
       - "8000:8000"
     volumes:

@@ -7,3 +7,5 @@ export { VehiclesPage } from './Vehicles';
 export { NotFoundPage } from './NotFound';
 export { PaymentMethodsPage } from './Settings/PaymentMethods';
 export { ReportsPage } from './Reports';
+export { default as LoginPage } from './Login';
+export { AdminUsersPage } from './Admin/Users';

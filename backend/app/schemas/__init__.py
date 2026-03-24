@@ -51,6 +51,15 @@ from app.schemas.payment_method import (
     PaymentMethodUpdate,
     PaymentMethodResponse,
 )
+from app.schemas.user import (
+    UserCreate,
+    UserUpdate,
+    UserResponse,
+)
+from app.schemas.auth import (
+    LoginRequest,
+    TokenResponse,
+)
 
 __all__ = [
     "BaseSchema",
@@ -80,4 +89,9 @@ __all__ = [
     "PaymentMethodCreate",
     "PaymentMethodUpdate",
     "PaymentMethodResponse",
+    "UserCreate",
+    "UserUpdate",
+    "UserResponse",
+    "LoginRequest",
+    "TokenResponse",
 ]

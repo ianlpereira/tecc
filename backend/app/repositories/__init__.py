@@ -10,6 +10,7 @@ from app.repositories.bill_repository import BillRepository
 from app.repositories.bill_attachment_repository import BillAttachmentRepository
 from app.repositories.vehicle_repository import VehicleRepository
 from app.repositories.payment_method_repository import PaymentMethodRepository
+from app.repositories.user_repository import UserRepository
 
 __all__ = [
     "BaseRepository",
@@ -20,4 +21,5 @@ __all__ = [
     "BillAttachmentRepository",
     "VehicleRepository",
     "PaymentMethodRepository",
+    "UserRepository",
 ]

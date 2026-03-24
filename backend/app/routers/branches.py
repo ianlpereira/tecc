@@ -6,11 +6,12 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.schemas import BranchCreate, BranchUpdate, BranchResponse
 from app.schemas.branch import BranchWithChildren
 from app.services import BranchService
 
-router = APIRouter(prefix="/api/v1/branches", tags=["branches"])
+router = APIRouter(prefix="/api/v1/branches", tags=["branches"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=List[BranchResponse])

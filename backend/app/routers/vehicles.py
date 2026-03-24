@@ -6,12 +6,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.schemas.vehicle import VehicleCreate, VehicleUpdate, VehicleResponse
 from app.schemas.bill import BillCreate, BillResponse
 from app.services.vehicle_service import VehicleService
 from app.services.bill_service import BillService
 
-router = APIRouter(prefix="/api/v1/vehicles", tags=["vehicles"])
+router = APIRouter(prefix="/api/v1/vehicles", tags=["vehicles"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=List[VehicleResponse])

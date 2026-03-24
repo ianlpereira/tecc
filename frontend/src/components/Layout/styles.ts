@@ -35,6 +35,16 @@ export const NavMenu = styled.nav`
   overflow-y: auto;
 `;
 
+export const NavSectionLabel = styled.div`
+  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg} ${props => props.theme.spacing.xs};
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: ${props => props.theme.spacing.sm};
+`;
+
 export const NavItem = styled.a<{ $active?: boolean }>`
   display: flex;
   align-items: center;
@@ -100,4 +110,41 @@ export const BranchSelectorWrapper = styled.div`
   gap: ${props => props.theme.spacing.sm};
   font-size: 14px;
   color: ${props => props.theme.colors.textSecondary};
+`;
+
+export const SidebarFooter = styled.div`
+  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+export const SidebarUser = styled.div`
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: ${props => props.theme.spacing.xs};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+export const LogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.sm};
+  width: 100%;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  padding: ${props => props.theme.spacing.sm} 0;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #fff;
+  }
+
+  svg {
+    font-size: 16px;
+  }
 `;

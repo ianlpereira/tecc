@@ -7,6 +7,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.schemas import (
     BillCreate, BillUpdate, BillResponse,
     BillRecurrenceUpdate,
@@ -18,7 +19,7 @@ from app.schemas.base import BaseSchema
 from app.services import BillService
 from app.models import BillStatus
 
-router = APIRouter(prefix="/api/v1/bills", tags=["bills"])
+router = APIRouter(prefix="/api/v1/bills", tags=["bills"], dependencies=[Depends(get_current_user)])
 
 
 class MarkPaidRequest(BaseSchema):

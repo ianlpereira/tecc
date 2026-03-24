@@ -6,10 +6,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.schemas import VendorCreate, VendorUpdate, VendorResponse
 from app.services import VendorService
 
-router = APIRouter(prefix="/api/v1/vendors", tags=["vendors"])
+router = APIRouter(prefix="/api/v1/vendors", tags=["vendors"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=List[VendorResponse])

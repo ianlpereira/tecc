@@ -284,3 +284,30 @@ export interface BillReportResponse {
   rows: BillReportRow[];
   summary: BillReportSummary;
 }
+
+// ============ AUTH / USER types (Epic 18) ============
+
+export interface AuthUser {
+  id: number;
+  username: string;
+  email: string | null;
+  full_name: string | null;
+  role: 'admin' | 'user';
+  is_active: boolean;
+}
+
+export interface UserCreate {
+  username: string;
+  password: string;
+  email?: string | null;
+  full_name?: string | null;
+  role: 'admin' | 'user';
+}
+
+export interface UserUpdate {
+  email?: string | null;
+  full_name?: string | null;
+  role?: 'admin' | 'user';
+  is_active?: boolean;
+  password?: string | null;
+}

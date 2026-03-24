@@ -9,6 +9,8 @@ from app.core.config import settings
 from app.routers import health, branches, vendors, categories, bills, bill_attachments
 from app.routers.vehicles import router as vehicles_router
 from app.routers.payment_methods import router as payment_methods_router
+from app.routers.auth import router as auth_router
+from app.routers.users import router as users_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -29,6 +31,8 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(health.router, tags=["Health"])
 app.include_router(branches.router)
 app.include_router(vendors.router)
@@ -37,6 +41,18 @@ app.include_router(bills.router)
 app.include_router(bill_attachments.router)
 app.include_router(vehicles_router)
 app.include_router(payment_methods_router)
+
+
+@app.on_event("startup")
+async def on_startup():
+    """Create default admin user on first startup if none exists."""
+    from app.core.database import AsyncSessionLocal
+    from app.services.user_service import UserService
+
+    async with AsyncSessionLocal() as db:
+        service = UserService(db)
+        await service.ensure_default_admin()
+
 
 # Root endpoint
 @app.get("/")

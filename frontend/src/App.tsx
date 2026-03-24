@@ -7,6 +7,8 @@ import ptBR from 'antd/locale/pt_BR'
 import GlobalStyle from './styles/GlobalStyle'
 import theme from './styles/theme'
 import { queryClient } from './services/queryClient'
+import { AuthProvider } from './context/AuthContext'
+import { PrivateRoute, AdminRoute } from './components/PrivateRoute'
 import {
   DashboardPage,
   BranchesPage,
@@ -17,6 +19,8 @@ import {
   NotFoundPage,
   PaymentMethodsPage,
   ReportsPage,
+  LoginPage,
+  AdminUsersPage,
 } from './pages'
 
 function App(): React.ReactElement {
@@ -29,17 +33,27 @@ function App(): React.ReactElement {
         >
           <GlobalStyle />
           <Router>
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/bills" element={<BillsPage />} />
-              <Route path="/branches" element={<BranchesPage />} />
-              <Route path="/vendors" element={<VendorsPage />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/vehicles" element={<VehiclesPage />} />
-              <Route path="/settings/payment-methods" element={<PaymentMethodsPage />} />
-              <Route path="/reports" element={<ReportsPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
+            <AuthProvider>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<LoginPage />} />
+
+                {/* Protected routes */}
+                <Route path="/" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+                <Route path="/bills" element={<PrivateRoute><BillsPage /></PrivateRoute>} />
+                <Route path="/branches" element={<PrivateRoute><BranchesPage /></PrivateRoute>} />
+                <Route path="/vendors" element={<PrivateRoute><VendorsPage /></PrivateRoute>} />
+                <Route path="/categories" element={<PrivateRoute><CategoriesPage /></PrivateRoute>} />
+                <Route path="/vehicles" element={<PrivateRoute><VehiclesPage /></PrivateRoute>} />
+                <Route path="/settings/payment-methods" element={<PrivateRoute><PaymentMethodsPage /></PrivateRoute>} />
+                <Route path="/reports" element={<PrivateRoute><ReportsPage /></PrivateRoute>} />
+
+                {/* Admin-only routes */}
+                <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </AuthProvider>
           </Router>
         </ConfigProvider>
       </ThemeProvider>
@@ -48,3 +62,4 @@ function App(): React.ReactElement {
 }
 
 export default App
+

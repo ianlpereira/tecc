@@ -32,6 +32,9 @@ import type {
   BatchMarkPaidResponse,
   DueTodaySummary,
   BillReportResponse,
+  AuthUser,
+  UserCreate,
+  UserUpdate,
 } from '../types';
 
 const API_PREFIX = '/api/v1';
@@ -307,5 +310,34 @@ export const paymentMethodApi = {
 
   delete: async (id: number): Promise<void> => {
     await apiClient.delete(`${API_PREFIX}/payment-methods/${id}`);
+  },
+};
+
+// ============ USERS (Epic 18 — admin only) ============
+
+export const usersApi = {
+  getAll: async (): Promise<AuthUser[]> => {
+    const response = await apiClient.get(`${API_PREFIX}/users/`);
+    return response.data;
+  },
+
+  create: async (data: UserCreate): Promise<AuthUser> => {
+    const response = await apiClient.post(`${API_PREFIX}/users/`, data);
+    return response.data;
+  },
+
+  update: async (id: number, data: UserUpdate): Promise<AuthUser> => {
+    const response = await apiClient.put(`${API_PREFIX}/users/${id}`, data);
+    return response.data;
+  },
+
+  deactivate: async (id: number): Promise<AuthUser> => {
+    const response = await apiClient.patch(`${API_PREFIX}/users/${id}/deactivate`);
+    return response.data;
+  },
+
+  activate: async (id: number): Promise<AuthUser> => {
+    const response = await apiClient.patch(`${API_PREFIX}/users/${id}/activate`);
+    return response.data;
   },
 };

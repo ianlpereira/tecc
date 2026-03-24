@@ -9,10 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import base64
 
 from app.core.database import get_db
+from app.core.dependencies import get_current_user
 from app.schemas import BillAttachmentResponse, BillAttachmentWithData
 from app.services.bill_attachment_service import BillAttachmentService
 
-router = APIRouter(prefix="/api/v1/bills/{bill_id}/attachments", tags=["bill-attachments"])
+router = APIRouter(prefix="/api/v1/bills/{bill_id}/attachments", tags=["bill-attachments"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=List[BillAttachmentResponse])

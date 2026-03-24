@@ -30,6 +30,15 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "TECC"
 
+    # Auth / JWT
+    JWT_SECRET_KEY: str = "jwt-secret-change-in-production-please"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
+
+    # Default admin credentials (created on first startup)
+    DEFAULT_ADMIN_USERNAME: str = "admin"
+    DEFAULT_ADMIN_PASSWORD: str = "admin123"
+
     class Config:
         env_file = ".env"
         case_sensitive = True
