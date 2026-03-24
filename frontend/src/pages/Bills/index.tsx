@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { Table, Button, Modal, Select, Popconfirm, message, Tooltip, Badge, Space, Form, DatePicker } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined, PaperClipOutlined, FilterOutlined, CheckCircleOutlined, SwapOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, CopyOutlined, SyncOutlined, PaperClipOutlined, FilterOutlined, CheckCircleOutlined, SwapOutlined, CloseOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
 import { BillForm } from '../../components/BillForm';
-import { useBills, useDeleteBill, useBranches, useVendors, useCategories, useMarkBillAsPaid, useActivePaymentMethods } from '../../hooks';
+import { useBills, useDeleteBill, useBranches, useVendors, useCategories, useMarkBillAsPaid, useActivePaymentMethods, useBatchDeleteBills, useBatchMarkPaidBills } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
@@ -37,6 +37,8 @@ export function BillsPage(): React.ReactElement {
   const { mutate: deleteBill } = useDeleteBill();
   const { mutate: markAsPaid } = useMarkBillAsPaid();
   const { data: paymentMethods = [] } = useActivePaymentMethods();
+  const { mutate: batchDelete, isPending: isBatchDeleting } = useBatchDeleteBills();
+  const { mutate: batchMarkPaid, isPending: isBatchPaying } = useBatchMarkPaidBills();
   
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingBill, setEditingBill] = React.useState<Bill | null>(null);
@@ -53,6 +55,12 @@ export function BillsPage(): React.ReactElement {
   const [payModalBill, setPayModalBill] = useState<Bill | null>(null);
   const [payBank, setPayBank] = useState<string | undefined>(undefined);
   const [payDate, setPayDate] = useState<dayjs.Dayjs>(dayjs());
+
+  // Epic 14: batch selection state
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [batchPayModalOpen, setBatchPayModalOpen] = useState(false);
+  const [batchPayBank, setBatchPayBank] = useState<string | undefined>(undefined);
+  const [batchPayDate, setBatchPayDate] = useState<dayjs.Dayjs>(dayjs());
 
   const branchMap = useMemo(() => {
     return new Map(branches?.map(b => [b.id, b.name]));
@@ -181,6 +189,46 @@ export function BillsPage(): React.ReactElement {
         },
         onError: () => {
           message.error('Erro ao registrar pagamento');
+        },
+      }
+    );
+  };
+
+  // Epic 14: batch handlers
+  const handleBatchDelete = () => {
+    const ids = selectedRowKeys as number[];
+    batchDelete(
+      { ids },
+      {
+        onSuccess: (data) => {
+          message.success(`${data.deleted} conta(s) excluída(s) com sucesso!`);
+          setSelectedRowKeys([]);
+        },
+        onError: () => {
+          message.error('Erro ao excluir contas');
+        },
+      }
+    );
+  };
+
+  const handleBatchMarkPaid = () => {
+    const ids = selectedRowKeys as number[];
+    batchMarkPaid(
+      {
+        ids,
+        payment_bank: batchPayBank || null,
+        paid_at: batchPayDate ? batchPayDate.format('YYYY-MM-DD') : null,
+      },
+      {
+        onSuccess: (data) => {
+          message.success(`${data.updated} conta(s) marcada(s) como pagas. ${data.skipped > 0 ? `${data.skipped} ignorada(s).` : ''}`);
+          setBatchPayModalOpen(false);
+          setSelectedRowKeys([]);
+          setBatchPayBank(undefined);
+          setBatchPayDate(dayjs());
+        },
+        onError: () => {
+          message.error('Erro ao marcar contas como pagas');
         },
       }
     );
@@ -438,6 +486,41 @@ export function BillsPage(): React.ReactElement {
       </S.SummaryBar>
 
       <Card>
+        {selectedRowKeys.length > 0 && (
+          <div style={{ background: '#e6f4ff', border: '1px solid #91caff', borderRadius: 6, padding: '10px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 600, color: '#1677ff' }}>
+              ✓ {selectedRowKeys.length} conta(s) selecionada(s)
+            </span>
+            <Button
+              size="small"
+              type="primary"
+              icon={<CheckCircleOutlined />}
+              onClick={() => { setBatchPayModalOpen(true); setBatchPayBank(undefined); setBatchPayDate(dayjs()); }}
+              style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+            >
+              Marcar como pagas
+            </Button>
+            <Popconfirm
+              title={`Excluir ${selectedRowKeys.length} conta(s)?`}
+              description="Esta ação não pode ser desfeita."
+              onConfirm={handleBatchDelete}
+              okText="Sim, excluir"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true, loading: isBatchDeleting }}
+            >
+              <Button size="small" danger icon={<DeleteOutlined />}>
+                Excluir selecionadas
+              </Button>
+            </Popconfirm>
+            <Button
+              size="small"
+              icon={<CloseOutlined />}
+              onClick={() => setSelectedRowKeys([])}
+            >
+              Cancelar seleção
+            </Button>
+          </div>
+        )}
         <Table
           columns={columns}
           dataSource={filteredBills}
@@ -445,6 +528,11 @@ export function BillsPage(): React.ReactElement {
           loading={isLoading}
           pagination={{ pageSize: 15 }}
           scroll={{ x: 1200 }}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (keys) => setSelectedRowKeys(keys),
+            type: 'checkbox',
+          }}
         />
       </Card>
 
@@ -498,6 +586,42 @@ export function BillsPage(): React.ReactElement {
               Valor: <strong>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payModalBill.amount)}</strong>
             </p>
           )}
+        </Form>
+      </Modal>
+
+      {/* Epic 14: Batch mark paid modal */}
+      <Modal
+        title={`Marcar ${selectedRowKeys.length} conta(s) como pagas`}
+        open={batchPayModalOpen}
+        onOk={handleBatchMarkPaid}
+        onCancel={() => setBatchPayModalOpen(false)}
+        okText="Confirmar Pagamento"
+        cancelText="Cancelar"
+        confirmLoading={isBatchPaying}
+        width={420}
+      >
+        <Form layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item label="Banco / Forma de Pagamento">
+            <Select
+              placeholder="Selecione o banco (opcional)"
+              allowClear
+              value={batchPayBank}
+              onChange={(v) => setBatchPayBank(v)}
+              options={paymentMethods.map((pm) => ({ value: pm.name, label: pm.name }))}
+            />
+          </Form.Item>
+          <Form.Item label="Data do Pagamento">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY"
+              value={batchPayDate}
+              onChange={(d) => d && setBatchPayDate(d)}
+              allowClear={false}
+            />
+          </Form.Item>
+          <p style={{ color: '#666', fontSize: 13 }}>
+            Esta ação marcará <strong>{selectedRowKeys.length}</strong> conta(s) como pagas. Contas já pagas ou canceladas serão ignoradas.
+          </p>
         </Form>
       </Modal>
     </Layout>
