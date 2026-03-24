@@ -5,11 +5,14 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { useCreateBill, useUpdateBill, useBranches, useVendors, useCategories, useVehicles } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
 import { BillAttachments } from '../BillAttachments';
+
+dayjs.extend(customParseFormat);
 
 const billSchema = z.object({
   branch_id: z.number().min(1, 'Filial é obrigatória'),
@@ -279,7 +282,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
             <DatePicker
               style={{ width: '100%' }}
               format="DD/MM/YYYY"
-              value={field.value ? dayjs(field.value) : null}
+              value={field.value ? dayjs(field.value, 'YYYY-MM-DD') : null}
               onChange={(date) => field.onChange(date ? date.format('YYYY-MM-DD') : '')}
               placeholder="Selecione a data"
             />

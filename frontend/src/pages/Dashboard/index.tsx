@@ -18,6 +18,7 @@ import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
 import * as S from '../../components/common/styles';
+import { parseLocalDate, isBillOverdue } from '../../utils/date';
 
 const BANKS = [
   'Bradesco', 'Itaú', 'Santander', 'Caixa', 'Banco do Brasil',
@@ -31,20 +32,8 @@ const statusLabels: Record<BillStatus, string> = {
   [BillStatus.CANCELLED]: 'Cancelada',
 };
 
-const parseLocalDate = (dateStr: string): Date => {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
-
-const isOverdue = (bill: Bill): boolean => {
-  if (bill.status !== BillStatus.PENDING) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return parseLocalDate(bill.due_date) < today;
-};
-
 const getBillStatusDisplay = (bill: Bill): { label: string; tag: string } => {
-  if (isOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
+  if (isBillOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
   return { label: statusLabels[bill.status], tag: bill.status };
 };
 

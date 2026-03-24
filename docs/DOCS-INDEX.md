@@ -46,8 +46,8 @@
 - **Status:** ✅ Completo — 24/03/2026 (+ hotfix `e2f3a4b5c6d7`)
 
 ### 📋 ÉPICO 9: Correção de Fuso Horário — Bug -1 Dia
-- **Arquivo:** `EPIC-9-TIMEZONE-BUG.md`
-- **Status:** 📋 Planejado — 🔴 Crítico
+- **Arquivo:** `EPIC-9-COMPLETE.md`
+- **Status:** ✅ Completo — 24/03/2026
 
 ### 📋 ÉPICO 10: Filtros de Data em Contas a Pagar
 - **Arquivo:** `EPIC-10-DATE-FILTERS.md`

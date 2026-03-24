@@ -11,6 +11,7 @@ import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
 import * as S from '../../components/common/styles';
+import { formatDate, isBillOverdue } from '../../utils/date';
 
 const BANKS = [
   'Bradesco', 'Itaú', 'Santander', 'Caixa', 'Banco do Brasil',
@@ -24,20 +25,8 @@ const statusLabels: Record<BillStatus, string> = {
   [BillStatus.CANCELLED]: 'Cancelada',
 };
 
-const parseLocalDate = (dateStr: string): Date => {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
-
-const isOverdue = (bill: Bill): boolean => {
-  if (bill.status !== BillStatus.PENDING) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return parseLocalDate(bill.due_date) < today;
-};
-
 const getBillStatusDisplay = (bill: Bill): { label: string; tag: string } => {
-  if (isOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
+  if (isBillOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
   return { label: statusLabels[bill.status], tag: bill.status };
 };
 
@@ -83,9 +72,9 @@ export function BillsPage(): React.ReactElement {
 
     if (statusFilter !== 'all') {
       if (statusFilter === 'overdue' as any) {
-        result = result.filter((bill: Bill) => isOverdue(bill));
+        result = result.filter((bill: Bill) => isBillOverdue(bill));
       } else {
-        result = result.filter((bill: Bill) => bill.status === statusFilter && !isOverdue(bill));
+        result = result.filter((bill: Bill) => bill.status === statusFilter && !isBillOverdue(bill));
       }
     }
     if (categoryFilter !== 'all') {
@@ -104,8 +93,8 @@ export function BillsPage(): React.ReactElement {
   const totalSummary = useMemo(() => {
     const total = filteredBills.reduce((sum: number, b: Bill) => sum + b.amount, 0);
     const paid = filteredBills.filter((b: Bill) => b.status === BillStatus.PAID).reduce((sum: number, b: Bill) => sum + b.amount, 0);
-    const pending = filteredBills.filter((b: Bill) => b.status === BillStatus.PENDING && !isOverdue(b)).reduce((sum: number, b: Bill) => sum + b.amount, 0);
-    const overdue = filteredBills.filter((b: Bill) => isOverdue(b)).reduce((sum: number, b: Bill) => sum + b.amount, 0);
+    const pending = filteredBills.filter((b: Bill) => b.status === BillStatus.PENDING && !isBillOverdue(b)).reduce((sum: number, b: Bill) => sum + b.amount, 0);
+    const overdue = filteredBills.filter((b: Bill) => isBillOverdue(b)).reduce((sum: number, b: Bill) => sum + b.amount, 0);
     return { total, paid, pending, overdue };
   }, [filteredBills]);
 
@@ -255,7 +244,7 @@ export function BillsPage(): React.ReactElement {
       title: 'Vencimento',
       dataIndex: 'due_date',
       key: 'due_date',
-      render: (date: string) => new Date(date).toLocaleDateString('pt-BR'),
+      render: (date: string) => formatDate(date),
     },
     {
       title: 'Status',

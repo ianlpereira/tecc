@@ -22,6 +22,7 @@ import type { FipeVehicleType } from '../../hooks/useFipe';
 import { BillStatus } from '../../types';
 import type { Vehicle, Bill } from '../../types';
 import * as S from '../../components/common/styles';
+import { formatDate, isBillOverdue } from '../../utils/date';
 
 const VEHICLE_TYPE_OPTIONS: { value: FipeVehicleType; label: string }[] = [
   { value: 'carros', label: 'Carro' },
@@ -31,18 +32,6 @@ const VEHICLE_TYPE_OPTIONS: { value: FipeVehicleType; label: string }[] = [
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-const parseLocalDate = (dateStr: string): Date => {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
-
-const isOverdue = (bill: Bill): boolean => {
-  if (bill.status !== BillStatus.PENDING) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return parseLocalDate(bill.due_date) < today;
-};
-
 const statusLabels: Record<BillStatus, string> = {
   [BillStatus.PENDING]: 'Pendente',
   [BillStatus.APPROVED]: 'Aprovada',
@@ -51,7 +40,7 @@ const statusLabels: Record<BillStatus, string> = {
 };
 
 const getBillStatusDisplay = (bill: Bill) => {
-  if (isOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
+  if (isBillOverdue(bill)) return { label: 'Vencida', tag: 'overdue' };
   return { label: statusLabels[bill.status], tag: bill.status };
 };
 
@@ -78,7 +67,7 @@ function VehicleBillsTab({ vehicle }: { vehicle: Vehicle }) {
       title: 'Vencimento',
       dataIndex: 'due_date',
       key: 'due_date',
-      render: (d: string) => new Date(d).toLocaleDateString('pt-BR'),
+      render: (d: string) => formatDate(d),
     },
     {
       title: 'Status',

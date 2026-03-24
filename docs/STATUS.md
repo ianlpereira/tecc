@@ -48,21 +48,27 @@
 
 ---
 
-## 📋 ÉPICO 9 — Correção de Fuso Horário / Bug -1 dia (PLANEJADO — 🔴 CRÍTICO)
+## ✅ ÉPICO 9 — Correção de Fuso Horário / Bug -1 dia (COMPLETO)
 
-> **Documentação:** `docs/EPIC-9-TIMEZONE-BUG.md`
-> **Prioridade:** 🔴 Crítica — afeta todos os dados de produção
+> **Documentação:** `docs/EPIC-9-COMPLETE.md`
+> **Concluído em:** 24/03/2026
 
-### Backend
+### Root Cause
 
-- [ ] Schemas `due_date` / `paid_at` como `date` (não `datetime`)
-- [ ] Remover conversões de timezone nos validators
-- [ ] Script de correção de datas já armazenadas com offset errado
+`new Date("YYYY-MM-DD")` e `dayjs("YYYY-MM-DD")` interpretam a string como UTC midnight → shift de -3h em BRT → dia anterior exibido.
 
-### Frontend
+### Fix Aplicado
 
-- [ ] Enviar data como string `YYYY-MM-DD` sem conversão UTC
-- [ ] Exibir datas sem ajuste de timezone
+- [x] Criado `frontend/src/utils/date.ts` — utilitário centralizado: `formatDate`, `parseLocalDate`, `parseDayjs`, `isToday`, `isBillOverdue`
+- [x] `Bills/index.tsx` — coluna "Vencimento": `new Date(date).toLocaleDateString()` → `formatDate(date)`
+- [x] `Bills/index.tsx` — `isOverdue` local removida → `isBillOverdue` do utils
+- [x] `BillForm/index.tsx` — `dayjs(field.value)` → `dayjs(field.value, 'YYYY-MM-DD')` + `customParseFormat` plugin
+- [x] `Dashboard/index.tsx` — `parseLocalDate`/`isOverdue` locais removidas → importadas de utils
+- [x] `Vehicles/index.tsx` — idem + coluna "Vencimento" corrigida
+- [x] Dados históricos verificados: 0 registros com offset errado no banco
+- [x] `tsc --noEmit` → EXIT:0
+
+**Status: ✅ CONCLUÍDO**
 
 ---
 

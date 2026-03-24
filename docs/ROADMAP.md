@@ -22,7 +22,7 @@
 | Epic 6 | Funcionalidades Avançadas | ✅ Completo | — |
 | Epic 7 | Controle de Frota | ✅ Completo | — |
 | Epic 8 | Soft Delete | ✅ Completo | — |
-| **Epic 9** | **Correção Fuso Horário (Bug -1 dia)** | **📋 Planejado** | **🔴 Crítica** |
+| Epic 9 | Correção Fuso Horário (Bug -1 dia) | ✅ Completo | 🔴 Crítica |
 | Epic 10 | Filtros de Data em Contas | 📋 Planejado | 🟡 Alta |
 | Epic 11 | Meios de Pagamento (CRUD) | 📋 Planejado | 🟡 Alta |
 | Epic 12 | Recorrência com Datas Manuais | 📋 Planejado | 🟡 Média |
@@ -52,21 +52,23 @@
 
 ---
 
-## 📋 Epic 9: Correção de Fuso Horário (PLANEJADO — 🔴 CRÍTICO)
+## ✅ Epic 9: Correção de Fuso Horário (CONCLUÍDO)
 
-**Status:** 📋 **PLANEJADO**
-**Documentação:** `docs/EPIC-9-TIMEZONE-BUG.md`
-**Prioridade:** 🔴 Crítica — afeta todos os dados em produção
+**Status:** ✅ **DONE** — Concluído em 24/03/2026
+**Documentação:** `docs/EPIC-9-COMPLETE.md`
 
-### Problema:
-Datas cadastradas no sistema exibem 1 dia a menos (ex: cadastra dia 10, aparece dia 9). Causa: frontend envia ISO UTC meia-noite, PostgreSQL armazena UTC, e ao exibir em BRT (UTC-3) o dia aparece como o anterior.
+### Root Cause
 
-### O que será feito:
+`new Date("YYYY-MM-DD")` interpreta a string como UTC midnight → shift de -3h em BRT → exibia o dia anterior.
 
-- 🔲 **Frontend** — enviar data como string `YYYY-MM-DD` (sem conversão UTC)
-- 🔲 **Backend** — campos `due_date`, `paid_at` como `date` (não `datetime`)
-- 🔲 **Schema** — `BillCreate.due_date: date`, validators de timezone removidos
-- 🔲 **Script opcional** — correção de datas já armazenadas com offset errado
+### O que foi implementado:
+
+- ✅ `frontend/src/utils/date.ts` — utilitário centralizado (`formatDate`, `parseLocalDate`, `parseDayjs`, `isToday`, `isBillOverdue`)
+- ✅ `Bills/index.tsx` — coluna "Vencimento" usando `formatDate()`, `isOverdue` local removida
+- ✅ `BillForm/index.tsx` — `dayjs(value, 'YYYY-MM-DD')` com `customParseFormat` plugin
+- ✅ `Dashboard/index.tsx` — helpers locais removidos, importados de utils
+- ✅ `Vehicles/index.tsx` — idem + coluna "Vencimento" corrigida
+- ✅ Dados históricos: 0 registros com offset errado no banco
 
 ---
 
