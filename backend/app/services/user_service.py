@@ -80,9 +80,6 @@ class UserService:
         """Update user fields. Only provided (non-None) fields are updated."""
         user = await self.get_user(user_id)
 
-        if data.username is not None:
-            # UserUpdate doesn't have username — handled here for safety
-            pass
         if data.email is not None:
             user.email = data.email
         if data.full_name is not None:
