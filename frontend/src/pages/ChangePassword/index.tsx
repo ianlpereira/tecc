@@ -1,4 +1,4 @@
-import React from 'react'
+import { useState } from 'react'
 import { Form, Input, Button, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../../services/apiClient'
@@ -11,11 +11,11 @@ interface FormValues {
   confirm_password: string
 }
 
-export function ChangePasswordPage(): React.ReactElement {
+export function ChangePasswordPage() {
   const { refreshUser, logout } = useAuth()
   const navigate = useNavigate()
   const [form] = Form.useForm<FormValues>()
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (values: FormValues) => {
     setLoading(true)

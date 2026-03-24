@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { Table, Button, Modal, Tag, Switch, message, Form, Input, Select, Popconfirm } from 'antd';
 import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -18,16 +18,16 @@ const { Option } = Select;
 
 type ModalMode = 'create' | 'edit';
 
-export function AdminUsersPage(): React.ReactElement {
+export function AdminUsersPage() {
   const { data: users, isLoading } = useUsers();
   const { mutate: createUser, isPending: creating } = useCreateUser();
   const { mutate: updateUser, isPending: updating } = useUpdateUser();
   const { mutate: deactivateUser } = useDeactivateUser();
   const { mutate: activateUser } = useActivateUser();
 
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [modalMode, setModalMode] = React.useState<ModalMode>('create');
-  const [editingUser, setEditingUser] = React.useState<AuthUser | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<ModalMode>('create');
+  const [editingUser, setEditingUser] = useState<AuthUser | null>(null);
 
   const [form] = Form.useForm<UserCreate & UserUpdate>();
 

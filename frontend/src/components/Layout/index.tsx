@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   DashboardOutlined,
@@ -17,7 +17,7 @@ import { useAuth } from '../../context/AuthContext';
 import * as S from './styles';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
   title?: string;
 }
 
@@ -36,7 +36,7 @@ const adminMenuItems = [
   { path: '/admin/users', label: 'Usuários', icon: <TeamOutlined /> },
 ];
 
-export function Layout({ children, title = 'TECC' }: LayoutProps): React.ReactElement {
+export function Layout({ children, title = 'TECC' }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, logout, user } = useAuth();

@@ -1,10 +1,10 @@
-import React from 'react'
+import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { Spin } from 'antd'
 import { useAuth } from '../../context/AuthContext'
 
 interface Props {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /** Redirects to /login if not authenticated; to /change-password if must_change_password is set. */
