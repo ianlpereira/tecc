@@ -3,6 +3,7 @@ Bill model for accounts payable.
 """
 
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum, Date, Boolean
+from sqlalchemy.orm import relationship
 from app.models.base import BaseModel
 import enum
 from datetime import date
@@ -44,8 +45,19 @@ class Bill(BaseModel):
     payment_bank = Column(String(100), nullable=True)
     paid_at = Column(Date, nullable=True)
 
+    # Epic 17: linked payment method (FK)
+    payment_method_id = Column(Integer, ForeignKey("payment_methods.id"), nullable=True)
+    payment_method = relationship("PaymentMethod", foreign_keys=[payment_method_id], lazy="select")
+
     # Vehicle association
     vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=True)
 
     def __repr__(self) -> str:
         return f"<Bill(id={self.id}, branch_id={self.branch_id}, vendor_id={self.vendor_id}, amount={self.amount})>"
+
+    @property
+    def payment_method_name(self) -> str | None:
+        """Return the linked payment method name, if any."""
+        if self.payment_method is not None:
+            return self.payment_method.name
+        return None

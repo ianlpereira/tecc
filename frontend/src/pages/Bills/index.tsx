@@ -337,6 +337,12 @@ export function BillsPage(): React.ReactElement {
       render: (bank: string | null) => bank || <span style={{ color: '#bbb' }}>—</span>,
     },
     {
+      title: 'Meio de Pgto',
+      dataIndex: 'payment_method_name',
+      key: 'payment_method_name',
+      render: (name: string | null) => name || <span style={{ color: '#bbb' }}>—</span>,
+    },
+    {
       title: 'Ações',
       key: 'actions',
       width: 160,

@@ -5,7 +5,7 @@ import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
-import { useBranches, useVendors, useCategories } from '../../hooks';
+import { useBranches, useVendors, useCategories, useActivePaymentMethods } from '../../hooks';
 import { useReport } from '../../hooks/useBills';
 import { BillStatus } from '../../types';
 import type { BillReportRow } from '../../types';
@@ -32,6 +32,7 @@ export function ReportsPage(): React.ReactElement {
   const { data: branches = [] } = useBranches();
   const { data: vendors = [] } = useVendors();
   const { data: categories = [] } = useCategories();
+  const { data: paymentMethods = [] } = useActivePaymentMethods();
 
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
@@ -41,6 +42,7 @@ export function ReportsPage(): React.ReactElement {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
   const [selectedStatus, setSelectedStatus] = useState<BillStatus | undefined>(undefined);
   const [selectedPaymentBank, setSelectedPaymentBank] = useState<string | undefined>(undefined);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number | undefined>(undefined);
 
   const { data: reportData, refetch, isFetching } = useReport(filters);
 
@@ -60,6 +62,7 @@ export function ReportsPage(): React.ReactElement {
     if (selectedCategory) newFilters.category_id = selectedCategory;
     if (selectedStatus) newFilters.status = selectedStatus;
     if (selectedPaymentBank) newFilters.payment_bank = selectedPaymentBank;
+    if (selectedPaymentMethod) newFilters.payment_method_id = selectedPaymentMethod;
     setFilters(newFilters);
     setTimeout(() => refetch(), 0);
   };
@@ -72,12 +75,13 @@ export function ReportsPage(): React.ReactElement {
     setSelectedCategory(undefined);
     setSelectedStatus(undefined);
     setSelectedPaymentBank(undefined);
+    setSelectedPaymentMethod(undefined);
     setFilters({});
   };
 
   const handleExportCsv = () => {
     if (!reportData?.rows?.length) return;
-    const headers = ['ID', 'Descrição', 'Fornecedor', 'Categoria', 'Filial', 'Veículo', 'Valor', 'Vencimento', 'Status', 'Banco', 'Pago em'];
+    const headers = ['ID', 'Descrição', 'Fornecedor', 'Categoria', 'Filial', 'Veículo', 'Valor', 'Vencimento', 'Status', 'Banco', 'Pago em', 'Meio de Pgto'];
     const rows = reportData.rows.map(r => [
       r.id,
       `"${r.description.replace(/"/g, '""')}"`,
@@ -90,6 +94,7 @@ export function ReportsPage(): React.ReactElement {
       statusLabels[r.status] || r.status,
       r.payment_bank || '',
       r.paid_at || '',
+      r.payment_method_name || '',
     ]);
     const csvContent = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -178,6 +183,13 @@ export function ReportsPage(): React.ReactElement {
       key: 'paid_at',
       render: (v: string | null) => (v ? formatDate(v) : <span style={{ color: '#bbb' }}>—</span>),
       width: 110,
+    },
+    {
+      title: 'Meio de Pgto',
+      dataIndex: 'payment_method_name',
+      key: 'payment_method_name',
+      render: (v: string | null) => v || <span style={{ color: '#bbb' }}>—</span>,
+      width: 140,
     },
   ];
 
@@ -273,6 +285,18 @@ export function ReportsPage(): React.ReactElement {
                   { value: BillStatus.PAID, label: 'Paga' },
                   { value: BillStatus.CANCELLED, label: 'Cancelada' },
                 ]}
+              />
+            </Form.Item>
+            <Form.Item label="Meio de Pagamento">
+              <Select
+                placeholder="Todos"
+                allowClear
+                style={{ width: 180 }}
+                value={selectedPaymentMethod}
+                onChange={setSelectedPaymentMethod}
+                showSearch
+                optionFilterProp="label"
+                options={paymentMethods.map((pm: any) => ({ value: pm.id, label: pm.name }))}
               />
             </Form.Item>
           </div>

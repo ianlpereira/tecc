@@ -80,6 +80,7 @@ class BillService:
         recurrence_day_of_month: int = None,
         recurrence_dates: list = None,
         vehicle_id: int = None,
+        payment_method_id: int = None,  # Epic 17
     ) -> Bill:
         """Create a new bill. If is_recurring=True, generates N bills.
         Supports three modes:
@@ -134,6 +135,7 @@ class BillService:
                     recurrence_total=total,
                     recurrence_index=i + 1,
                     vehicle_id=vehicle_id,
+                    payment_method_id=payment_method_id,
                 )
                 if i == 0 and invoice_number:
                     bill.invoice_number = invoice_number
@@ -185,6 +187,7 @@ class BillService:
                     recurrence_total=recurrence_occurrences,
                     recurrence_index=i + 1,
                     vehicle_id=vehicle_id,
+                    payment_method_id=payment_method_id,
                 )
                 # Assign invoice_number only to the first occurrence
                 if i == 0 and invoice_number:
@@ -208,6 +211,7 @@ class BillService:
             notes=notes,
             status=BillStatus.PENDING,
             vehicle_id=vehicle_id,
+            payment_method_id=payment_method_id,
         )
         await self.repository.create(bill)
         await self.repository.commit()
@@ -232,6 +236,7 @@ class BillService:
         category_id: int = None,
         branch_id: int = None,
         vehicle_id: int = None,
+        payment_method_id: int = None,  # Epic 17
     ) -> Optional[Bill]:
         """Update a bill."""
         bill = await self.repository.get_by_id(bill_id)
@@ -265,6 +270,8 @@ class BillService:
             update_data["branch_id"] = branch_id
         if vehicle_id is not None:
             update_data["vehicle_id"] = vehicle_id
+        if payment_method_id is not None:
+            update_data["payment_method_id"] = payment_method_id
 
         await self.repository.update(bill_id, update_data)
         await self.repository.commit()
@@ -316,6 +323,7 @@ class BillService:
         vendor_id: int = None,
         category_id: int = None,
         vehicle_id: int = None,
+        payment_method_id: int = None,  # Epic 17
     ) -> Optional[Bill]:
         """Update a recurring bill with scope: 'this' | 'this_and_next' | 'all'."""
         bill = await self.repository.get_by_id(bill_id)
@@ -339,6 +347,8 @@ class BillService:
             update_fields["category_id"] = category_id
         if vehicle_id is not None:
             update_fields["vehicle_id"] = vehicle_id
+        if payment_method_id is not None:
+            update_fields["payment_method_id"] = payment_method_id
 
         if scope == "this":
             if due_date is not None:
@@ -459,6 +469,7 @@ class BillService:
         vehicle_ids: list = None,
         statuses: list = None,
         payment_banks: list = None,
+        payment_method_ids: list = None,  # Epic 17
     ) -> dict:
         """Get report rows with joined names + summary totals."""
         rows = await self.repository.get_for_report(
@@ -471,6 +482,7 @@ class BillService:
             vehicle_ids=vehicle_ids,
             statuses=statuses,
             payment_banks=payment_banks,
+            payment_method_ids=payment_method_ids,
         )
 
         paid_amount = sum(r["amount"] for r in rows if r["status"] == BillStatus.PAID)

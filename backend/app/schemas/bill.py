@@ -30,6 +30,7 @@ class BillCreate(BillBase):
     recurrence_day_of_month: int | None = None
     recurrence_dates: Optional[List[date]] = None  # Epic 12: manual dates mode
     vehicle_id: int | None = None
+    payment_method_id: int | None = None  # Epic 17: linked payment method
 
 
 class BillUpdate(BaseSchema):
@@ -47,6 +48,7 @@ class BillUpdate(BaseSchema):
     category_id: int | None = None
     branch_id: int | None = None
     vehicle_id: int | None = None
+    payment_method_id: int | None = None  # Epic 17
 
 
 class BillResponse(TimestampedSchema):
@@ -72,6 +74,8 @@ class BillResponse(TimestampedSchema):
     paid_at: date | None = None
     vehicle_id: int | None = None
     attachments_count: int = 0
+    payment_method_id: int | None = None       # Epic 17
+    payment_method_name: str | None = None     # Epic 17 (resolved via join)
 
 
 # ── Epic 13: Recurrence edit scope ───────────────────────────────────────────
@@ -88,6 +92,7 @@ class BillRecurrenceUpdate(BaseSchema):
     vendor_id: int | None = None
     category_id: int | None = None
     vehicle_id: int | None = None
+    payment_method_id: int | None = None  # Epic 17
 
 
 # ── Epic 14: Batch actions ────────────────────────────────────────────────────
@@ -148,6 +153,7 @@ class BillReportRow(BaseSchema):
     status: BillStatus
     payment_bank: str | None = None
     paid_at: date | None = None
+    payment_method_name: str | None = None  # Epic 17
 
 
 class BillReportSummary(BaseSchema):

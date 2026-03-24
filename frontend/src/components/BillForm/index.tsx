@@ -7,7 +7,7 @@ import { z } from 'zod';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { useCreateBill, useUpdateBill, useUpdateBillRecurrence, useBranches, useVendors, useCategories, useVehicles } from '../../hooks';
+import { useCreateBill, useUpdateBill, useUpdateBillRecurrence, useBranches, useVendors, useCategories, useVehicles, useActivePaymentMethods } from '../../hooks';
 import { useBranchStore } from '../../context/branchStore';
 import { BillStatus } from '../../types';
 import type { Bill } from '../../types';
@@ -31,6 +31,7 @@ const billSchema = z.object({
   recurrence_occurrences: z.number().min(2).max(60).nullable().optional(),
   recurrence_day_of_month: z.number().min(1).max(28).nullable().optional(),
   vehicle_id: z.number().nullable().optional(),
+  payment_method_id: z.number().nullable().optional(),  // Epic 17
 });
 
 type BillFormData = z.infer<typeof billSchema>;
@@ -50,6 +51,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
   const { data: vendors } = useVendors();
   const { data: categories } = useCategories();
   const { data: vehicles } = useVehicles();
+  const { data: paymentMethods = [] } = useActivePaymentMethods();
   const { currentBranch } = useBranchStore();
 
   // Epic 12: manual dates state
@@ -87,6 +89,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
       recurrence_interval_days: null,
       recurrence_occurrences: null,
       recurrence_day_of_month: null,
+      payment_method_id: initialValues?.payment_method_id ?? null,
     },
   });
 
@@ -108,6 +111,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
         invoice_number: bill.invoice_number || '',
         notes: bill.notes || '',
         status: bill.status,
+        payment_method_id: bill.payment_method_id ?? null,
       });
     } else if (currentBranch) {
       setValue('branch_id', currentBranch.id);
@@ -138,6 +142,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
       recurrence_occurrences: (data.is_recurring && !useManualDates) ? data.recurrence_occurrences : null,
       recurrence_day_of_month: useFixedDay ? data.recurrence_day_of_month : null,
       vehicle_id: data.vehicle_id || null,
+      payment_method_id: data.payment_method_id ?? null,
     };
 
     if (useManualDates) {
@@ -189,6 +194,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
           vendor_id: pendingFormData.vendor_id,
           category_id: pendingFormData.category_id,
           vehicle_id: pendingFormData.vehicle_id ?? null,
+          payment_method_id: pendingFormData.payment_method_id ?? null,
         },
       },
       {
@@ -401,6 +407,29 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
                   value: v.id,
                   label: `${v.plate.toUpperCase()} — ${v.brand} ${v.model}`,
                 })) ?? []),
+              ]}
+            />
+          )}
+        />
+      </Form.Item>
+
+      <Form.Item label="Meio de Pagamento (opcional)">
+        <Controller
+          name="payment_method_id"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              allowClear
+              placeholder="Selecione o meio de pagamento"
+              showSearch
+              optionFilterProp="label"
+              options={[
+                { value: null, label: 'Nenhum' },
+                ...(paymentMethods.map((pm: any) => ({
+                  value: pm.id,
+                  label: pm.name,
+                }))),
               ]}
             />
           )}

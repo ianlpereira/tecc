@@ -105,6 +105,8 @@ export interface Bill {
   paid_at?: string | null;
   attachments_count?: number;
   vehicle_id?: number | null;
+  payment_method_id?: number | null;    // Epic 17
+  payment_method_name?: string | null;  // Epic 17
 }
 
 export interface BillCreate {
@@ -122,6 +124,7 @@ export interface BillCreate {
   recurrence_day_of_month?: number | null;
   recurrence_dates?: string[] | null;
   vehicle_id?: number | null;
+  payment_method_id?: number | null;  // Epic 17
 }
 
 export interface BillUpdate {
@@ -129,9 +132,15 @@ export interface BillUpdate {
   amount?: number;
   due_date?: string;
   status?: BillStatus;
+  invoice_number?: string | null;
   notes?: string | null;
   payment_bank?: string | null;
   paid_at?: string | null;
+  vendor_id?: number;
+  category_id?: number;
+  branch_id?: number;
+  vehicle_id?: number | null;
+  payment_method_id?: number | null;  // Epic 17
 }
 
 export interface MarkPaidPayload {
@@ -210,10 +219,12 @@ export interface BillRecurrenceUpdate {
   description?: string;
   amount?: number;
   due_date?: string;
+  invoice_number?: string | null;
   notes?: string | null;
   vendor_id?: number;
   category_id?: number;
   vehicle_id?: number | null;
+  payment_method_id?: number | null;  // Epic 17
 }
 
 // --- Epic 14: Batch operations ---
@@ -259,6 +270,7 @@ export interface BillReportRow {
   status: BillStatus;
   payment_bank: string | null;
   paid_at: string | null;
+  payment_method_name: string | null;  // Epic 17
 }
 
 export interface BillReportSummary {

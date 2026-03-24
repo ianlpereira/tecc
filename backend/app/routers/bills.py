@@ -114,6 +114,7 @@ async def get_report(
     vehicle_ids: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     payment_bank: Optional[str] = Query(None),
+    payment_method_id: Optional[int] = Query(None),  # Epic 17
     db: AsyncSession = Depends(get_db),
 ):
     """Get report with optional filters and totals."""
@@ -131,6 +132,7 @@ async def get_report(
         vehicle_ids=parse_ids(vehicle_ids),
         statuses=[status] if status else None,
         payment_banks=[payment_bank] if payment_bank else None,
+        payment_method_ids=[payment_method_id] if payment_method_id else None,
     )
 
 
@@ -165,6 +167,7 @@ async def create_bill(schema: BillCreate, db: AsyncSession = Depends(get_db)):
             schema.recurrence_day_of_month,
             schema.recurrence_dates,
             schema.vehicle_id,
+            schema.payment_method_id,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -188,6 +191,7 @@ async def update_bill(bill_id: int, schema: BillUpdate, db: AsyncSession = Depen
             schema.category_id,
             schema.branch_id,
             schema.vehicle_id,
+            schema.payment_method_id,
         )
         if not updated:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill not found")
@@ -223,6 +227,7 @@ async def update_bill_recurrence(
             schema.vendor_id,
             schema.category_id,
             schema.vehicle_id,
+            schema.payment_method_id,
         )
         if not updated:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill not found")
