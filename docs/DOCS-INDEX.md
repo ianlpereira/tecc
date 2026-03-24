@@ -41,6 +41,10 @@
 - **Arquivo:** `EPIC-7-VEHICLES.md`
 - **Status:** ✅ Completo — 06/03/2026
 
+### 📋 ÉPICO 8: Soft Delete em Todas as Entidades
+- **Arquivo:** `EPIC-8-SOFT-DELETE-PLANNING.md`
+- **Status:** 📋 Planejado — aguardando implementação
+
 ---
 
 ## 📊 Referências Gerais

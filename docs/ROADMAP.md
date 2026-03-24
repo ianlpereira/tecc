@@ -10,7 +10,22 @@
 
 ---
 
-## ✅ Épico 7: Controle de Frota de Veículos (COMPLETO)
+## 📋 Épico 8: Soft Delete em Todas as Entidades (PLANEJADO)
+
+**Status:** 📋 **PLANEJADO** — 24/03/2026
+**Documentação:** `docs/EPIC-8-SOFT-DELETE-PLANNING.md`
+
+### O que será implementado:
+- 📋 **BaseModel** — campo `deleted_at TIMESTAMP NULL` herdado por todas as entidades
+- 📋 **BaseRepository** — método `soft_delete()`, filtro automático `deleted_at IS NULL` em todos os selects
+- 📋 **Repositories especializados** — todos os `get_by_*` ganham filtro `deleted_at IS NULL`
+- 📋 **Services** — validação 409 ao deletar entidades pai com bills ativas
+- 📋 **Migration Alembic** — adicionar coluna + índices + remover UNIQUEs de nome/placa
+- 📋 **Frontend** — tratamento de erro 409 nos hooks de delete
+
+### Entidades afetadas: `branches`, `vendors`, `categories`, `vehicles`, `bills`
+
+---
 
 **Status:** ✅ **DONE** — Concluído em 06/03/2026
 **Documentação:** `docs/EPIC-7-VEHICLES.md`
