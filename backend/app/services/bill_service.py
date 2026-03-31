@@ -322,6 +322,7 @@ class BillService:
         notes: str = None,
         vendor_id: int = None,
         category_id: int = None,
+        branch_id: int = None,
         vehicle_id: int = None,
         payment_method_id: int = None,  # Epic 17
     ) -> Optional[Bill]:
@@ -345,6 +346,8 @@ class BillService:
             update_fields["vendor_id"] = vendor_id
         if category_id is not None:
             update_fields["category_id"] = category_id
+        if branch_id is not None:
+            update_fields["branch_id"] = branch_id
         if vehicle_id is not None:
             update_fields["vehicle_id"] = vehicle_id
         if payment_method_id is not None:

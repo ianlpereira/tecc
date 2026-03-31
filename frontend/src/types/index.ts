@@ -223,6 +223,7 @@ export interface BillRecurrenceUpdate {
   notes?: string | null;
   vendor_id?: number;
   category_id?: number;
+  branch_id?: number;
   vehicle_id?: number | null;
   payment_method_id?: number | null;  // Epic 17
 }

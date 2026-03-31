@@ -193,6 +193,7 @@ export function BillForm({ bill, initialValues, onSuccess, onCancel }: BillFormP
           notes: pendingFormData.notes || null,
           vendor_id: pendingFormData.vendor_id,
           category_id: pendingFormData.category_id,
+          branch_id: pendingFormData.branch_id,
           vehicle_id: pendingFormData.vehicle_id ?? null,
           payment_method_id: pendingFormData.payment_method_id ?? null,
         },

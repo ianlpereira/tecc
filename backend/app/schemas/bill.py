@@ -91,6 +91,7 @@ class BillRecurrenceUpdate(BaseSchema):
     notes: str | None = None
     vendor_id: int | None = None
     category_id: int | None = None
+    branch_id: int | None = None
     vehicle_id: int | None = None
     payment_method_id: int | None = None  # Epic 17
 

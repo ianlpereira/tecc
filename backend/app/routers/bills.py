@@ -227,6 +227,7 @@ async def update_bill_recurrence(
             schema.notes,
             schema.vendor_id,
             schema.category_id,
+            schema.branch_id,
             schema.vehicle_id,
             schema.payment_method_id,
         )
