@@ -15,6 +15,15 @@ class VendorRepository(BaseRepository[Vendor]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Vendor)
 
+    async def get_all(self) -> List[Vendor]:
+        """Retrieve all non-deleted vendors ordered alphabetically by name."""
+        result = await self.db.execute(
+            select(Vendor)
+            .where(Vendor.deleted_at == None)  # noqa: E711
+            .order_by(Vendor.name)
+        )
+        return result.scalars().all()
+
     async def get_by_name(self, name: str) -> Optional[Vendor]:
         """Get non-deleted vendor by name."""
         result = await self.db.execute(

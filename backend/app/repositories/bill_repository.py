@@ -24,7 +24,7 @@ class BillRepository(BaseRepository[Bill]):
             select(Bill)
             .options(joinedload(Bill.payment_method))
             .where(Bill.deleted_at == None)  # noqa: E711
-            .order_by(Bill.due_date, Bill.id)
+            .order_by(Bill.due_date, Bill.description)
         )
         return result.unique().scalars().all()
 
@@ -49,7 +49,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.branch_id == branch_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
-            .order_by(Bill.due_date, Bill.id)
+            .order_by(Bill.due_date, Bill.description)
         )
         return result.unique().scalars().all()
 
@@ -62,7 +62,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.branch_id.in_(branch_ids),
                 Bill.deleted_at == None,  # noqa: E711
             )
-            .order_by(Bill.due_date, Bill.id)
+            .order_by(Bill.due_date, Bill.description)
         )
         return result.unique().scalars().all()
 
@@ -75,7 +75,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.vendor_id == vendor_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
-            .order_by(Bill.due_date, Bill.id)
+            .order_by(Bill.due_date, Bill.description)
         )
         return result.unique().scalars().all()
 
@@ -88,7 +88,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.status == status,
                 Bill.deleted_at == None,  # noqa: E711
             )
-            .order_by(Bill.due_date, Bill.id)
+            .order_by(Bill.due_date, Bill.description)
         )
         return result.unique().scalars().all()
 
@@ -130,7 +130,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.vehicle_id == vehicle_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
-            .order_by(Bill.due_date, Bill.id)
+            .order_by(Bill.due_date, Bill.description)
         )
         return result.unique().scalars().all()
 
@@ -143,7 +143,7 @@ class BillRepository(BaseRepository[Bill]):
                 Bill.category_id == category_id,
                 Bill.deleted_at == None,  # noqa: E711
             )
-            .order_by(Bill.due_date, Bill.id)
+            .order_by(Bill.due_date, Bill.description)
         )
         return result.unique().scalars().all()
 
@@ -213,7 +213,7 @@ class BillRepository(BaseRepository[Bill]):
         if payment_method_ids:
             stmt = stmt.where(Bill.payment_method_id.in_(payment_method_ids))
 
-        stmt = stmt.order_by(Bill.due_date, Bill.id)
+        stmt = stmt.order_by(Bill.due_date, Bill.description)
         result = await self.db.execute(stmt)
         rows = result.all()
 

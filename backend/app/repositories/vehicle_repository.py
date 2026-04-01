@@ -15,6 +15,15 @@ class VehicleRepository(BaseRepository[Vehicle]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Vehicle)
 
+    async def get_all(self) -> List[Vehicle]:
+        """Retrieve all non-deleted vehicles ordered alphabetically by plate."""
+        result = await self.db.execute(
+            select(Vehicle)
+            .where(Vehicle.deleted_at == None)  # noqa: E711
+            .order_by(Vehicle.plate)
+        )
+        return result.scalars().all()
+
     async def get_by_branch(self, branch_id: int) -> List[Vehicle]:
         """Get all non-deleted vehicles for a branch."""
         result = await self.db.execute(
@@ -22,6 +31,7 @@ class VehicleRepository(BaseRepository[Vehicle]):
                 Vehicle.branch_id == branch_id,
                 Vehicle.deleted_at == None,  # noqa: E711
             )
+            .order_by(Vehicle.plate)
         )
         return result.scalars().all()
 

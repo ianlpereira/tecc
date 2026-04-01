@@ -103,7 +103,8 @@ export function BillsPage(): React.ReactElement {
       result = result.filter((bill: Bill) => bill.due_date.startsWith(prefix));
     }
     result = [...result].sort((a: Bill, b: Bill) => {
-      const cmp = a.due_date.localeCompare(b.due_date);
+      const dateCmp = a.due_date.localeCompare(b.due_date);
+      const cmp = dateCmp !== 0 ? dateCmp : a.description.localeCompare(b.description, 'pt-BR');
       return sortOrder === 'asc' ? cmp : -cmp;
     });
 

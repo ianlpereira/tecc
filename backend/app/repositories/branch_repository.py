@@ -16,6 +16,15 @@ class BranchRepository(BaseRepository[Branch]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Branch)
 
+    async def get_all(self) -> List[Branch]:
+        """Retrieve all non-deleted branches ordered alphabetically by name."""
+        result = await self.db.execute(
+            select(Branch)
+            .where(Branch.deleted_at == None)  # noqa: E711
+            .order_by(Branch.name)
+        )
+        return result.scalars().all()
+
     async def get_by_name(self, name: str) -> Optional[Branch]:
         """Get non-deleted branch by name."""
         result = await self.db.execute(
@@ -84,5 +93,6 @@ class BranchRepository(BaseRepository[Branch]):
             .options(selectinload(Branch.parent))
             .options(selectinload(Branch.children))
             .where(Branch.deleted_at == None)  # noqa: E711
+            .order_by(Branch.name)
         )
         return list(result.scalars().all())

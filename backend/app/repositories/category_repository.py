@@ -15,6 +15,15 @@ class CategoryRepository(BaseRepository[Category]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, Category)
 
+    async def get_all(self) -> List[Category]:
+        """Retrieve all non-deleted categories ordered alphabetically by name."""
+        result = await self.db.execute(
+            select(Category)
+            .where(Category.deleted_at == None)  # noqa: E711
+            .order_by(Category.name)
+        )
+        return result.scalars().all()
+
     async def get_by_name(self, name: str) -> Optional[Category]:
         """Get non-deleted category by name."""
         result = await self.db.execute(

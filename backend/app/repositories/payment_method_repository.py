@@ -15,6 +15,15 @@ class PaymentMethodRepository(BaseRepository[PaymentMethod]):
     def __init__(self, db: AsyncSession):
         super().__init__(db, PaymentMethod)
 
+    async def get_all(self) -> List[PaymentMethod]:
+        """Retrieve all non-deleted payment methods ordered alphabetically by name."""
+        result = await self.db.execute(
+            select(PaymentMethod)
+            .where(PaymentMethod.deleted_at == None)  # noqa: E711
+            .order_by(PaymentMethod.name)
+        )
+        return result.scalars().all()
+
     async def get_by_name(self, name: str) -> Optional[PaymentMethod]:
         """Get non-deleted payment method by name."""
         result = await self.db.execute(
