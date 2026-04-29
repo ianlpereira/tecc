@@ -1,6 +1,24 @@
-# 📊 Status Projeto — Épicos 1–17
+# 📊 Status Projeto — Épicos 1–17 + Features
 
-> **Última Atualização:** Épico 17 Completo ✅
+> **Última Atualização:** Feature Gráficos no Relatório ✅ — 29/04/2026
+
+---
+
+## ✅ FEATURE — Visualização em Gráficos no Relatório (COMPLETO)
+
+> **Concluído:** 29/04/2026 | **Documentação:** `docs/FEATURE-REPORTS-CHARTS.md`
+
+### Frontend
+- [x] Dependência `recharts` instalada via npm
+- [x] Gráfico de Barras: "Valor por Categoria (Top 10)" — agrupa `amount` por `category_name`
+- [x] Gráfico de Pizza: "Distribuição por Status" — agrupa `amount` por `status` com cores coerentes
+- [x] Layout responsivo com `flex-wrap` (lado a lado em telas largas, empilhado em telas menores)
+- [x] Gráficos exibidos condicionalmente (só aparecem com resultados de relatório)
+- [x] Tooltips com valores formatados em BRL
+- [x] Zero mudanças no backend (100% client-side)
+- [x] `tsc --noEmit` → EXIT:0
+
+**Status: ✅ CONCLUÍDO**
 
 ---
 

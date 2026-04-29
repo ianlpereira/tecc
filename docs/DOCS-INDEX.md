@@ -75,7 +75,12 @@
 
 ### 📋 ÉPICO 16: Relatórios
 - **Arquivo:** `EPIC-16-REPORTS.md`
-- **Status:** 📋 Planejado — 🟢 Alta
+- **Status:** ✅ Completo
+
+### ✅ FEATURE: Gráficos no Relatório
+- **Arquivo:** `FEATURE-REPORTS-CHARTS.md`
+- **Status:** ✅ Completo — 29/04/2026
+- **Resumo:** Gráfico de barras (valor por categoria) e gráfico de pizza (distribuição por status) exibidos após geração do relatório. 100% client-side com `recharts`.
 
 ---
 

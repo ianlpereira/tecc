@@ -3,6 +3,19 @@ import { Table, Button, Select, DatePicker, Form, Space, Statistic, Divider } fr
 import { DownloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
 import { useBranches, useVendors, useCategories, useActivePaymentMethods } from '../../hooks';
@@ -195,6 +208,37 @@ export function ReportsPage(): React.ReactElement {
 
   const summary = reportData?.summary;
 
+  const categoryChartData = (() => {
+    if (!reportData?.rows?.length) return [];
+    const map: Record<string, number> = {};
+    for (const row of reportData.rows) {
+      const key = row.category_name || 'Sem categoria';
+      map[key] = (map[key] || 0) + row.amount;
+    }
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+  })();
+
+  const statusChartData = (() => {
+    if (!reportData?.rows?.length) return [];
+    const map: Record<string, number> = {};
+    for (const row of reportData.rows) {
+      const key = statusLabels[row.status] || row.status;
+      map[key] = (map[key] || 0) + row.amount;
+    }
+    return Object.entries(map).map(([name, value]) => ({ name, value }));
+  })();
+
+  const PIE_COLORS = ['#52c41a', '#faad14', '#1890ff', '#d9d9d9'];
+
+  const currencyAxisFormatter = (value: number) =>
+    new Intl.NumberFormat('pt-BR', { notation: 'compact', style: 'currency', currency: 'BRL' }).format(value);
+
+  const currencyTooltipFormatter = (value: unknown) =>
+    [formatCurrency(Number(value)), 'Valor'] as [string, string];
+
   return (
     <Layout title="Relatórios">
       <S.PageHeader>
@@ -321,6 +365,48 @@ export function ReportsPage(): React.ReactElement {
           </Card>
         </div>
       )}
+
+      {reportData?.rows?.length ? (
+        <div style={{ marginTop: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 480px', minWidth: 0 }}>
+            <Card title="Valor por Categoria (Top 10)">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={categoryChartData} margin={{ top: 4, right: 16, left: 8, bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-35} textAnchor="end" interval={0} tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={currencyAxisFormatter} tick={{ fontSize: 11 }} width={80} />
+                  <Tooltip formatter={currencyTooltipFormatter} />
+                  <Bar dataKey="value" fill="#1890ff" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+          <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+            <Card title="Distribuição por Status">
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie
+                    data={statusChartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    label={({ name, percent }) => `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`}
+                    labelLine={false}
+                  >
+                    {statusChartData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={currencyTooltipFormatter} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 16 }}>
         <Card>
