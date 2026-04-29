@@ -231,6 +231,31 @@ export function ReportsPage(): React.ReactElement {
     return Object.entries(map).map(([name, value]) => ({ name, value }));
   })();
 
+  const branchChartData = (() => {
+    if (!reportData?.rows?.length) return [];
+    const map: Record<string, number> = {};
+    for (const row of reportData.rows) {
+      const key = row.branch_name || 'Sem filial';
+      map[key] = (map[key] || 0) + row.amount;
+    }
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  })();
+
+  const vendorChartData = (() => {
+    if (!reportData?.rows?.length) return [];
+    const map: Record<string, number> = {};
+    for (const row of reportData.rows) {
+      const key = row.vendor_name || 'Sem fornecedor';
+      map[key] = (map[key] || 0) + row.amount;
+    }
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+  })();
+
   const PIE_COLORS = ['#52c41a', '#faad14', '#1890ff', '#d9d9d9'];
 
   const currencyAxisFormatter = (value: number) =>
@@ -367,7 +392,8 @@ export function ReportsPage(): React.ReactElement {
       )}
 
       {reportData?.rows?.length ? (
-        <div style={{ marginTop: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <>
+          <div style={{ marginTop: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 480px', minWidth: 0 }}>
             <Card title="Valor por Categoria (Top 10)">
               <ResponsiveContainer width="100%" height={260}>
@@ -406,6 +432,35 @@ export function ReportsPage(): React.ReactElement {
             </Card>
           </div>
         </div>
+        <div style={{ marginTop: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 480px', minWidth: 0 }}>
+            <Card title="Gasto por Filial">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={branchChartData} margin={{ top: 4, right: 16, left: 8, bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-35} textAnchor="end" interval={0} tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={currencyAxisFormatter} tick={{ fontSize: 11 }} width={80} />
+                  <Tooltip formatter={currencyTooltipFormatter} />
+                  <Bar dataKey="value" fill="#722ed1" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+          <div style={{ flex: '1 1 480px', minWidth: 0 }}>
+            <Card title="Gasto por Fornecedor (Top 10)">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={vendorChartData} margin={{ top: 4, right: 16, left: 8, bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-35} textAnchor="end" interval={0} tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={currencyAxisFormatter} tick={{ fontSize: 11 }} width={80} />
+                  <Tooltip formatter={currencyTooltipFormatter} />
+                  <Bar dataKey="value" fill="#fa8c16" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+        </div>
+        </>
       ) : null}
 
       <div style={{ marginTop: 16 }}>
