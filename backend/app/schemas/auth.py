@@ -1,0 +1,22 @@
+"""
+Auth schemas for login request and token response.
+"""
+
+from pydantic import BaseModel
+from app.schemas.user import UserResponse
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str

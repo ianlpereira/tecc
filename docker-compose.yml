@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tecc_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-tecc_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-tecc_password}
+      POSTGRES_DB: ${DB_NAME:-tecc_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tecc_user} -d ${DB_NAME:-tecc_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: tecc_backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-tecc_user}:${DB_PASSWORD:-tecc_password}@db:5432/${DB_NAME:-tecc_db}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-jwt-secret-change-in-production-please}
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-admin123}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      # Preserve compiled python cache across restarts
+      - backend_pycache:/app/__pycache__
+    depends_on:
+      db:
+        condition: service_healthy
+    # Override entrypoint for dev mode (skip migrations, use hot-reload)
+    entrypoint: []
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: tecc_frontend
+    environment:
+      NODE_ENV: development
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app:delegated
+      # Preserve node_modules from the image build
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres_data:
+  frontend_node_modules:
+  backend_pycache:

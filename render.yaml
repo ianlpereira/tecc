@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: tecc-backend
+    runtime: docker
+    region: ohio
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: DEFAULT_ADMIN_USERNAME
+        sync: false
+      - key: DEFAULT_ADMIN_PASSWORD
+        sync: false
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # entrypoint.sh already runs: alembic upgrade head && uvicorn
+    autoDeploy: true
+
+  - type: web
+    name: tecc-frontend
+    runtime: docker
+    region: ohio
+    plan: starter
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    dockerBuildArgs:
+      - key: VITE_API_URL
+        value: https://tecc-backend.onrender.com
+    autoDeploy: true
+
+  - type: pserv
+    name: tecc-db
+    runtime: docker
+    region: ohio
+    plan: starter
+    dockerfilePath: ./Dockerfile.postgres
+    autoDeploy: false
