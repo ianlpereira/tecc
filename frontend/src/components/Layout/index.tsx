@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { APP_NAME } from '../../config';
 import {
   DashboardOutlined,
   BankOutlined,
@@ -36,7 +37,7 @@ const adminMenuItems = [
   { path: '/admin/users', label: 'Usuários', icon: <TeamOutlined /> },
 ];
 
-export function Layout({ children, title = 'tecc' }: LayoutProps) {
+export function Layout({ children, title = APP_NAME }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, logout, user } = useAuth();
@@ -49,7 +50,7 @@ export function Layout({ children, title = 'tecc' }: LayoutProps) {
   return (
     <S.LayoutContainer>
       <S.Sidebar>
-        <S.Logo>tecc</S.Logo>
+        <S.Logo>{APP_NAME}</S.Logo>
         <S.NavMenu>
           {menuItems.map((item) => (
             <Link key={item.path} to={item.path} style={{ textDecoration: 'none' }}>

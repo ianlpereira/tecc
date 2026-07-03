@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Form, Input, Button } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { useAuth } from '../../context/AuthContext'
+import { APP_NAME } from '../../config'
 import * as S from './styles'
 
 export default function LoginPage() {
@@ -29,7 +30,7 @@ export default function LoginPage() {
     <S.Container>
       <S.Card>
         <S.Logo>
-          <S.Title>tecc</S.Title>
+          <S.Title>{APP_NAME}</S.Title>
           <S.Subtitle>Sistema Financeiro de Contas a Pagar</S.Subtitle>
         </S.Logo>
 
